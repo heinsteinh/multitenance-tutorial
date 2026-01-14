@@ -1,0 +1,15 @@
+{
+  "name": "step06-grpc-basics",
+  "version-string": "1.0.0",
+  "description": "Step 06: gRPC service definitions and basics",
+  "dependencies": [
+    "spdlog",
+    "nlohmann-json",
+    "fmt",
+    "sqlite3",
+    "catch2",
+    "grpc",
+    "protobuf"
+  ],
+  "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289"
+}

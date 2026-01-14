@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package multitenant.v1;
+
+option cc_enable_arenas = true;
+
+// Timestamp representation
+message Timestamp {
+    int64 seconds = 1;
+    int32 nanos = 2;
+}
+
+// Pagination parameters for list requests
+message Pagination {
+    int32 page = 1;
+    int32 page_size = 2;
+}
+
+// Pagination info in responses
+message PaginationInfo {
+    int32 page = 1;
+    int32 page_size = 2;
+    int32 total_pages = 3;
+    int64 total_items = 4;
+}
+
+// Standard error details
+message ErrorDetail {
+    string field = 1;
+    string message = 2;
+}
+
+// Empty message for requests/responses with no data
+message Empty {}

@@ -1,0 +1,13 @@
+{
+  "name": "step05-tenant-management",
+  "version-string": "1.0.0",
+  "description": "Step 05: Tenant Management",
+  "dependencies": [
+    "spdlog",
+    "nlohmann-json",
+    "fmt",
+    "sqlite3",
+    "catch2"
+  ],
+  "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289"
+}

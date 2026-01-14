@@ -1,0 +1,14 @@
+{
+  "name": "step10-complete-system",
+  "version-string": "1.0.0",
+  "description": "Step 10: Complete multi-tenant system with configuration management",
+  "dependencies": [
+    "spdlog",
+    "fmt",
+    "grpc",
+    "protobuf",
+    "catch2",
+    "nlohmann-json"
+  ],
+  "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289"
+}

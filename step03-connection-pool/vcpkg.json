@@ -1,0 +1,13 @@
+{
+  "name": "step03-connection-pool",
+  "version-string": "1.0.0",
+  "description": "Step 03: Thread-safe connection pooling",
+  "dependencies": [
+    "spdlog",
+    "nlohmann-json",
+    "fmt",
+    "sqlite3",
+    "catch2"
+  ],
+  "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289"
+}

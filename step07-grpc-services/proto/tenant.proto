@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package multitenant.v1;
+
+import "common.proto";
+
+option cc_enable_arenas = true;
+
+// Tenant represents a tenant organization
+message Tenant {
+    int64 id = 1;
+    string tenant_id = 2;      // Unique string identifier (slug)
+    string name = 3;
+    string plan = 4;           // free, basic, pro, enterprise
+    bool active = 5;
+    string created_at = 6;
+    string updated_at = 7;
+}
+
+// TenantService manages tenant lifecycle
+service TenantService {
+    // Get a single tenant by ID
+    rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
+    
+    // List all tenants with pagination
+    rpc ListTenants(ListTenantsRequest) returns (ListTenantsResponse);
+    
+    // Create a new tenant
+    rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+    
+    // Update an existing tenant
+    rpc UpdateTenant(UpdateTenantRequest) returns (UpdateTenantResponse);
+    
+    // Delete (deactivate) a tenant
+    rpc DeleteTenant(DeleteTenantRequest) returns (DeleteTenantResponse);
+    
+    // Provision tenant database
+    rpc ProvisionTenant(ProvisionTenantRequest) returns (ProvisionTenantResponse);
+}
+
+// GetTenant
+message GetTenantRequest {
+    string tenant_id = 1;
+}
+
+message GetTenantResponse {
+    Tenant tenant = 1;
+}
+
+// ListTenants
+message ListTenantsRequest {
+    Pagination pagination = 1;
+    bool active_only = 2;
+    string plan_filter = 3;
+}
+
+message ListTenantsResponse {
+    repeated Tenant tenants = 1;
+    PaginationInfo pagination = 2;
+}
+
+// CreateTenant
+message CreateTenantRequest {
+    string tenant_id = 1;
+    string name = 2;
+    string plan = 3;
+}
+
+message CreateTenantResponse {
+    Tenant tenant = 1;
+}
+
+// UpdateTenant
+message UpdateTenantRequest {
+    string tenant_id = 1;
+    optional string name = 2;
+    optional string plan = 3;
+    optional bool active = 4;
+}
+
+message UpdateTenantResponse {
+    Tenant tenant = 1;
+}
+
+// DeleteTenant
+message DeleteTenantRequest {
+    string tenant_id = 1;
+    bool permanent = 2;  // If true, delete data; if false, just deactivate
+}
+
+message DeleteTenantResponse {
+    bool success = 1;
+}
+
+// ProvisionTenant
+message ProvisionTenantRequest {
+    string tenant_id = 1;
+}
+
+message ProvisionTenantResponse {
+    bool success = 1;
+    string database_path = 2;
+}

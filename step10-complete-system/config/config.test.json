@@ -1,0 +1,37 @@
+{
+  "environment": "test",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 50054,
+    "enable_port_reuse": true,
+    "max_receive_message_size": -1,
+    "max_send_message_size": -1
+  },
+  "logging": {
+    "level": "debug",
+    "format": "default",
+    "enable_console": true,
+    "log_file_path": "",
+    "max_file_size": 10485760,
+    "max_files": 3
+  },
+  "interceptors": {
+    "enable_logging": true,
+    "enable_auth": false,
+    "enable_tenant": false,
+    "enable_metrics": false
+  },
+  "database": {
+    "type": "sqlite",
+    "connection_string": ":memory:",
+    "pool_size": 5,
+    "connection_timeout": 10
+  },
+  "security": {
+    "enable_tls": false,
+    "cert_file": "",
+    "key_file": "",
+    "ca_file": "",
+    "require_client_auth": false
+  }
+}

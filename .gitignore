@@ -1,0 +1,86 @@
+# Build directories
+build/
+build_template/
+cmake_build/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+CTestTestfile.cmake
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Compiled binaries and libraries
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# Test executables
+*_test
+*_tests
+test_*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.clangd
+compile_commands.json
+
+# vcpkg
+vcpkg_installed/
+vcpkg/
+.vcpkg-root
+
+# Generated proto files (can be regenerated)
+build/generated/
+*.pb.cc
+*.pb.h
+*.grpc.pb.cc
+*.grpc.pb.h
+
+# Database files (can be regenerated)
+*.db
+*.db-journal
+data/
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+
+# OS specific
+.DS_Store
+Thumbs.db
+.directory
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# CLion
+cmake-build-*/
+.cmake/
