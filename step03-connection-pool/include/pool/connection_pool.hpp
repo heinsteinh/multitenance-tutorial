@@ -17,17 +17,17 @@ namespace pool {
 
 /**
  * Thread-safe connection pool for SQLite databases.
- * 
+ *
  * Features:
  * - Pre-warms connections on startup
  * - Bounds maximum concurrent connections
  * - Blocks callers when pool is exhausted (with timeout)
  * - Automatically returns connections when PooledConnection is destroyed
  * - Health checks and connection validation
- * 
+ *
  * Usage:
  *   ConnectionPool pool(PoolConfig{.db_path = "app.db", .max_connections = 10});
- *   
+ *
  *   // In any thread:
  *   {
  *       auto conn = pool.acquire();
@@ -41,12 +41,12 @@ public:
      * @param config Pool configuration
      */
     explicit ConnectionPool(const PoolConfig& config);
-    
+
     /**
      * Convenience constructor
      */
     explicit ConnectionPool(const std::string& db_path, size_t max_connections = 10);
-    
+
     ~ConnectionPool();
 
     // Non-copyable, non-movable (contains mutex)
@@ -58,7 +58,7 @@ public:
     /**
      * Acquire a connection from the pool.
      * Blocks if no connections available until timeout.
-     * 
+     *
      * @return PooledConnection that auto-releases on destruction
      * @throws std::runtime_error if timeout exceeded
      */
@@ -66,7 +66,7 @@ public:
 
     /**
      * Try to acquire a connection without blocking.
-     * 
+     *
      * @return Optional containing connection, or nullopt if none available
      */
     std::optional<PooledConnection> try_acquire();
@@ -104,13 +104,13 @@ public:
 
 private:
     PoolConfig config_;
-    
+
     mutable std::mutex mutex_;
     std::condition_variable available_cv_;
-    
+
     // Available connections (not in use)
     std::deque<std::unique_ptr<db::Database>> pool_;
-    
+
     // Statistics (some atomic for lock-free reads)
     std::atomic<size_t> total_created_{0};
     std::atomic<size_t> active_count_{0};
@@ -120,24 +120,24 @@ private:
     std::atomic<size_t> timeouts_{0};
     std::atomic<size_t> failed_health_checks_{0};
     std::atomic<size_t> peak_active_{0};
-    
+
     std::atomic<double> total_acquire_time_us_{0};
     std::atomic<double> max_acquire_time_us_{0};
-    
+
     bool shutdown_{false};
 
     // Create a new database connection
     std::unique_ptr<db::Database> create_connection();
-    
+
     // Release a connection back to the pool
     void release(std::unique_ptr<db::Database> conn);
-    
+
     // Check if a connection is still valid
     bool validate_connection(db::Database& conn);
-    
+
     // Pre-warm the pool with min_connections
     void warm_pool();
-    
+
     // Update peak active tracking
     void update_peak();
 };

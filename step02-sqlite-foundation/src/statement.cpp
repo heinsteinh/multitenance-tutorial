@@ -72,7 +72,7 @@ Statement& Statement::bind(int index, double value) {
 Statement& Statement::bind(int index, std::string_view value) {
     // SQLITE_TRANSIENT makes SQLite copy the string
     check_bind_result(
-        sqlite3_bind_text(stmt_, index, value.data(), 
+        sqlite3_bind_text(stmt_, index, value.data(),
                          static_cast<int>(value.size()), SQLITE_TRANSIENT),
         index
     );
@@ -81,7 +81,7 @@ Statement& Statement::bind(int index, std::string_view value) {
 
 Statement& Statement::bind(int index, const std::vector<uint8_t>& blob) {
     check_bind_result(
-        sqlite3_bind_blob(stmt_, index, blob.data(), 
+        sqlite3_bind_blob(stmt_, index, blob.data(),
                          static_cast<int>(blob.size()), SQLITE_TRANSIENT),
         index
     );
@@ -123,15 +123,15 @@ Statement& Statement::bind(const std::string& name, std::nullptr_t) {
 
 bool Statement::step() {
     int result = sqlite3_step(stmt_);
-    
+
     if (result == SQLITE_ROW) {
         return true;
     }
-    
+
     if (result == SQLITE_DONE) {
         return false;
     }
-    
+
     throw_sqlite_error(result, "Statement step failed", db_);
     return false;  // Never reached
 }
@@ -188,7 +188,7 @@ template<>
 std::string Statement::column<std::string>(int index) const {
     const unsigned char* text = sqlite3_column_text(stmt_, index);
     int size = sqlite3_column_bytes(stmt_, index);
-    
+
     if (text && size > 0) {
         return std::string(reinterpret_cast<const char*>(text), size);
     }
@@ -199,7 +199,7 @@ template<>
 std::vector<uint8_t> Statement::column<std::vector<uint8_t>>(int index) const {
     const void* data = sqlite3_column_blob(stmt_, index);
     int size = sqlite3_column_bytes(stmt_, index);
-    
+
     if (data && size > 0) {
         const uint8_t* bytes = static_cast<const uint8_t*>(data);
         return std::vector<uint8_t>(bytes, bytes + size);
@@ -212,7 +212,7 @@ std::vector<uint8_t> Statement::column<std::vector<uint8_t>>(int index) const {
 int Statement::get_param_index(const std::string& name) const {
     int index = sqlite3_bind_parameter_index(stmt_, name.c_str());
     if (index == 0) {
-        throw DatabaseException(SQLITE_ERROR, 
+        throw DatabaseException(SQLITE_ERROR,
             "Unknown parameter name: " + name);
     }
     return index;
@@ -220,7 +220,7 @@ int Statement::get_param_index(const std::string& name) const {
 
 void Statement::check_bind_result(int result, int index) {
     if (result != SQLITE_OK) {
-        throw_sqlite_error(result, 
+        throw_sqlite_error(result,
             "Failed to bind parameter " + std::to_string(index), db_);
     }
 }

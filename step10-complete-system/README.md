@@ -136,22 +136,22 @@ step10-complete-system/
 server:
   address: "0.0.0.0:50051"
   max_threads: 4
-  
+
 database:
   system_db: "./data/system.db"
   tenant_directory: "./data/tenants/"
   pool:
     min_connections: 2
     max_connections: 10
-    
+
 auth:
   jwt_secret: "${JWT_SECRET}"
   token_expiry_hours: 24
-  
+
 logging:
   level: "info"
   format: "[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%n] %v"
-  
+
 metrics:
   enabled: true
   port: 9090
@@ -164,39 +164,39 @@ class MultiTenantServer {
 public:
     MultiTenantServer(const Config& config)
         : config_(config)
-        , tenant_manager_(config.database.system_db, 
+        , tenant_manager_(config.database.system_db,
                          config.database.tenant_directory)
         , jwt_validator_(config.auth.jwt_secret)
     {
         setup_services();
         setup_interceptors();
     }
-    
+
     void run() {
         ServerBuilder builder;
-        
+
         // Configure server
         builder.AddListeningPort(config_.server.address,
                                 grpc::InsecureServerCredentials());
-        
+
         // Register services
         builder.RegisterService(&tenant_handler_);
         builder.RegisterService(&user_handler_);
         builder.RegisterService(&order_handler_);
         builder.RegisterService(&health_service_);
-        
+
         // Add interceptors
         builder.experimental().SetInterceptorCreators(
             std::move(interceptor_factories_));
-        
+
         // Build and start
         server_ = builder.BuildAndStart();
         spdlog::info("Server listening on {}", config_.server.address);
-        
+
         // Wait for shutdown signal
         server_->Wait();
     }
-    
+
     void shutdown() {
         spdlog::info("Shutting down server...");
         server_->Shutdown();
@@ -209,13 +209,13 @@ private:
         tenant_service_ = std::make_unique<TenantService>(tenant_manager_);
         user_service_ = std::make_unique<UserService>(tenant_manager_, auth_service_);
         order_service_ = std::make_unique<OrderService>(tenant_manager_);
-        
+
         // Initialize handlers
         tenant_handler_ = TenantHandler(*tenant_service_);
         user_handler_ = UserHandler(*user_service_);
         order_handler_ = OrderHandler(*order_service_);
     }
-    
+
     void setup_interceptors() {
         interceptor_factories_.push_back(
             std::make_unique<InterceptorFactory>(
@@ -236,13 +236,13 @@ public:
     Status Check(ServerContext* context,
                  const HealthCheckRequest* request,
                  HealthCheckResponse* response) override {
-        
+
         // Check database connectivity
         if (!tenant_manager_.get_system_pool().is_healthy()) {
             response->set_status(HealthCheckResponse::NOT_SERVING);
             return Status::OK;
         }
-        
+
         response->set_status(HealthCheckResponse::SERVING);
         return Status::OK;
     }

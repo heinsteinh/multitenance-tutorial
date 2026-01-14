@@ -11,10 +11,10 @@ class ConnectionPool;
 
 /**
  * RAII wrapper for a pooled database connection.
- * 
+ *
  * Automatically returns the connection to the pool when destroyed.
  * Provides pointer-like access to the underlying Database.
- * 
+ *
  * Usage:
  *   {
  *       PooledConnection conn = pool.acquire();
@@ -32,7 +32,7 @@ public:
      * @param release Function to call when releasing
      */
     PooledConnection(std::unique_ptr<db::Database> conn, ReleaseFunc release);
-    
+
     ~PooledConnection();
 
     // Move-only
@@ -44,7 +44,7 @@ public:
     // Pointer-like access
     db::Database* operator->() { return conn_.get(); }
     const db::Database* operator->() const { return conn_.get(); }
-    
+
     db::Database& operator*() { return *conn_; }
     const db::Database& operator*() const { return *conn_; }
 

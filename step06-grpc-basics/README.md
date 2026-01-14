@@ -59,7 +59,7 @@ add_library(proto_lib
 )
 
 protobuf_generate(TARGET proto_lib)
-protobuf_generate(TARGET proto_lib LANGUAGE grpc 
+protobuf_generate(TARGET proto_lib LANGUAGE grpc
                   GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
                   PLUGIN "protoc-gen-grpc=\$<TARGET_FILE:gRPC::grpc_cpp_plugin>")
 ```
@@ -73,7 +73,7 @@ class UserServiceImpl final : public UserService::Service {
                         GetUserResponse* response) override {
         // Set tenant context from metadata
         TenantScope scope(get_tenant_from_context(context));
-        
+
         // Use repository
         auto user = user_repo_.find_by_id(request->user_id());
         if (user) {
@@ -88,7 +88,7 @@ class UserServiceImpl final : public UserService::Service {
 ### 4. Client Usage
 
 ```cpp
-auto channel = grpc::CreateChannel("localhost:50051", 
+auto channel = grpc::CreateChannel("localhost:50051",
                                    grpc::InsecureChannelCredentials());
 auto stub = UserService::NewStub(channel);
 

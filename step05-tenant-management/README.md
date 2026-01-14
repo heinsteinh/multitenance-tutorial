@@ -47,13 +47,13 @@ class TenantManager {
 public:
     // Get or create connection pool for tenant
     ConnectionPool& get_pool(const std::string& tenant_id);
-    
+
     // Provision new tenant database
     void provision_tenant(const Tenant& tenant);
-    
+
     // Remove tenant database
     void deprovision_tenant(const std::string& tenant_id);
-    
+
     // Migrate all tenant databases
     void migrate_all(const Migration& migration);
 };
@@ -67,7 +67,7 @@ Thread-local context for request processing:
 class TenantContext {
     static thread_local std::string current_tenant_id_;
     static thread_local int64_t current_user_id_;
-    
+
 public:
     static void set(const std::string& tenant_id, int64_t user_id);
     static std::string tenant_id();
@@ -93,7 +93,7 @@ class TenantRepository : public Repository<Entity> {
 public:
     TenantRepository(TenantManager& manager)
         : manager_(manager) {}
-    
+
 protected:
     ConnectionPool& get_pool() override {
         return manager_.get_pool(TenantContext::tenant_id());
@@ -183,7 +183,7 @@ manager.provision_tenant(tenant);
 // Use tenant database in request handler
 void handle_request(const Request& req) {
     TenantScope scope(req.tenant_id, req.user_id);
-    
+
     // All database operations now use correct tenant DB
     auto& pool = manager.get_pool(TenantContext::tenant_id());
     OrderRepository orders(pool);

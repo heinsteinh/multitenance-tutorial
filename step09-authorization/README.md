@@ -56,20 +56,20 @@ struct Role {
 class AuthorizationService {
 public:
     // Check if user has permission
-    bool has_permission(int64_t user_id, 
+    bool has_permission(int64_t user_id,
                        const std::string& resource,
                        const std::string& action);
-    
+
     // Check with resource ownership
     bool can_access(int64_t user_id,
                    const std::string& resource,
                    const std::string& action,
                    int64_t resource_owner_id);
-    
+
     // Grant/revoke permissions
     void grant_role(int64_t user_id, const std::string& role);
     void revoke_role(int64_t user_id, const std::string& role);
-    
+
     // Get user's effective permissions (including inherited)
     std::vector<Permission> get_effective_permissions(int64_t user_id);
 };
@@ -83,16 +83,16 @@ class Authorize {
 public:
     Authorize(const std::string& resource, const std::string& action)
         : resource_(resource), action_(action) {}
-    
+
     template<typename Func>
     auto operator()(Func&& handler) {
         return [=](auto&&... args) {
             auto user_id = TenantContext::user_id();
-            
+
             if (!auth_service_.has_permission(user_id, resource_, action_)) {
                 throw AuthorizationException("Access denied");
             }
-            
+
             return handler(std::forward<decltype(args)>(args)...);
         };
     }
@@ -112,7 +112,7 @@ Status CreateUser(...) {
 ```cpp
 class Policy {
 public:
-    virtual bool evaluate(const AuthContext& ctx, 
+    virtual bool evaluate(const AuthContext& ctx,
                          const Resource& resource) = 0;
 };
 
@@ -139,14 +139,14 @@ public:
         if (has_explicit_permission(ctx, resource, action)) {
             return true;
         }
-        
+
         // Evaluate policies
         for (const auto& policy : policies_) {
             if (!policy->evaluate(ctx, resource)) {
                 return false;
             }
         }
-        
+
         return true;
     }
 };
@@ -163,23 +163,23 @@ public:
         std::vector<std::string> roles;
         int64_t expires_at;
     };
-    
+
     Claims validate(const std::string& token) {
         // Verify signature
         auto decoded = jwt::decode(token);
-        
+
         auto verifier = jwt::verify()
             .allow_algorithm(jwt::algorithm::hs256(secret_))
             .with_issuer("multitenant-service");
-        
+
         verifier.verify(decoded);
-        
+
         // Check expiration
         auto exp = decoded.get_payload_claim("exp").as_int();
         if (exp < std::time(nullptr)) {
             throw AuthException("Token expired");
         }
-        
+
         return Claims{
             .user_id = decoded.get_payload_claim("sub").as_int(),
             .tenant_id = decoded.get_payload_claim("tenant").as_string(),
@@ -187,7 +187,7 @@ public:
             .expires_at = exp
         };
     }
-    
+
     std::string generate(const Claims& claims) {
         return jwt::create()
             .set_issuer("multitenant-service")

@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
       if (!app_config.security.cert_file.empty() &&
           !app_config.security.key_file.empty()) {
         grpc::SslServerCredentialsOptions::PemKeyCertPair key_cert_pair;
-        
+
         // Read certificate file
         std::ifstream cert_file(app_config.security.cert_file);
         if (!cert_file) {

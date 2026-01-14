@@ -78,11 +78,11 @@ inline void throw_sqlite_error(int error_code, const std::string& context, sqlit
         case SQLITE_CONSTRAINT_PRIMARYKEY:
         case SQLITE_CONSTRAINT_FOREIGNKEY:
             throw ConstraintException(message);
-        
+
         case SQLITE_BUSY:
         case SQLITE_LOCKED:
             throw BusyException(message);
-        
+
         default:
             throw DatabaseException(error_code, message);
     }

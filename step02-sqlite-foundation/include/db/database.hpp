@@ -28,11 +28,11 @@ struct DatabaseConfig {
 
 /**
  * RAII wrapper for SQLite database connection.
- * 
+ *
  * Usage:
  *   Database db(DatabaseConfig{.path = "app.db"});
  *   db.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)");
- *   
+ *
  *   auto stmt = db.prepare("INSERT INTO users (name) VALUES (?)");
  *   stmt.bind(1, "Alice");
  *   stmt.step();
@@ -45,13 +45,13 @@ public:
      * @throws DatabaseException on failure
      */
     explicit Database(const DatabaseConfig& config);
-    
+
     /**
      * Convenience constructor for simple cases
      * @param path Database file path
      */
     explicit Database(const std::string& path);
-    
+
     ~Database();
 
     // Move-only

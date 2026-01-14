@@ -1,6 +1,6 @@
 /**
  * Step 01: vcpkg Setup Demo
- * 
+ *
  * Demonstrates that vcpkg dependencies are properly integrated:
  * - spdlog for logging
  * - nlohmann/json for JSON handling
@@ -61,10 +61,10 @@ int main() {
     // Demonstrate fmt
     spdlog::info("");
     spdlog::info("Formatted output (fmt):");
-    
+
     std::string app_name = config["application"]["name"];
     int pool_size = config["database"]["pool_size"];
-    
+
     fmt::print(fmt::emphasis::bold, "  Application: {}\n", app_name);
     fmt::print(fg(fmt::color::green), "  Pool Size: {}\n", pool_size);
     fmt::print(fg(fmt::color::cyan), "  gRPC Port: {}\n", config["grpc"]["port"].get<int>());
@@ -72,10 +72,10 @@ int main() {
     // Demonstrate JSON access patterns
     spdlog::info("");
     spdlog::info("JSON access patterns:");
-    
+
     // Safe access with contains()
     if (config.contains("tenants")) {
-        spdlog::info("  Tenant isolation: {}", 
+        spdlog::info("  Tenant isolation: {}",
             config["tenants"]["isolation"].get<std::string>());
     }
 

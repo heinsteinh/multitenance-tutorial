@@ -11,7 +11,7 @@ namespace db {
 
 /**
  * RAII wrapper for SQLite prepared statements.
- * 
+ *
  * Usage:
  *   Statement stmt(db, "SELECT * FROM users WHERE id = ?");
  *   stmt.bind(1, user_id);
@@ -27,7 +27,7 @@ public:
      * @param sql SQL query with optional ? or :name placeholders
      */
     Statement(sqlite3* db, std::string_view sql);
-    
+
     ~Statement();
 
     // Move-only
@@ -148,7 +148,7 @@ public:
 private:
     sqlite3* db_ = nullptr;
     sqlite3_stmt* stmt_ = nullptr;
-    
+
     int get_param_index(const std::string& name) const;
     void check_bind_result(int result, int index);
 };

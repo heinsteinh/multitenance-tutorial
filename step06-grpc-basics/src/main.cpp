@@ -1,6 +1,6 @@
 /**
  * Step 06: gRPC Basics Demo
- * 
+ *
  * This demo shows the proto message usage without running a server.
  * For full server/client demo, run step06_server and step06_client separately.
  */
@@ -88,7 +88,7 @@ int main() {
     auto* user1 = list_resp.add_users();
     user1->set_username("alice");
     user1->set_role("admin");
-    
+
     auto* user2 = list_resp.add_users();
     user2->set_username("bob");
     user2->set_role("user");

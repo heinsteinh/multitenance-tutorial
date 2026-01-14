@@ -21,19 +21,19 @@ message Tenant {
 service TenantService {
     // Get a single tenant by ID
     rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
-    
+
     // List all tenants with pagination
     rpc ListTenants(ListTenantsRequest) returns (ListTenantsResponse);
-    
+
     // Create a new tenant
     rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
-    
+
     // Update an existing tenant
     rpc UpdateTenant(UpdateTenantRequest) returns (UpdateTenantResponse);
-    
+
     // Delete (deactivate) a tenant
     rpc DeleteTenant(DeleteTenantRequest) returns (DeleteTenantResponse);
-    
+
     // Provision tenant database
     rpc ProvisionTenant(ProvisionTenantRequest) returns (ProvisionTenantResponse);
 }

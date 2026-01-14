@@ -1,0 +1,23 @@
+# .clang-format-ignore
+
+# --- CMake/FetchContent dependencies ---
+*/_deps/*
+
+# --- Build outputs ---
+build/*
+out/*
+bin/*
+lib/*
+
+# --- Generated protobuf code ---
+# Typical protoc output files (.pb.cc / .pb.h)
+**/*.pb.cc
+**/*.pb.h
+# Sometimes protoc output goes into a 'generated' or 'proto' directory:
+*/generated/*
+*/proto/*
+
+# --- External code ---
+third_party/*
+external/*
+vendor/*

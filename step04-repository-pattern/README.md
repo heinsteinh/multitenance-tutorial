@@ -40,7 +40,7 @@ struct User {
     std::string email;
     bool active = true;
     std::string created_at;
-    
+
     // Entity metadata
     static constexpr auto table_name = "users";
     static constexpr auto primary_key = "id";
@@ -60,15 +60,15 @@ public:
     std::optional<Entity> find_by_id(int64_t id);
     std::vector<Entity> find_all();
     std::vector<Entity> find_by(const Specification<Entity>& spec);
-    
+
     int64_t insert(const Entity& entity);
     void update(const Entity& entity);
     void remove(int64_t id);
-    
+
     // Batch operations
     void insert_batch(const std::vector<Entity>& entities);
     int remove_by(const Specification<Entity>& spec);
-    
+
     // Counting
     size_t count();
     size_t count_by(const Specification<Entity>& spec);

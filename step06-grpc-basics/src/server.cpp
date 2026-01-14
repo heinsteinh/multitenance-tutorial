@@ -1,6 +1,6 @@
 /**
  * Step 06: gRPC Server Implementation
- * 
+ *
  * Basic gRPC server demonstrating:
  * - Service implementation
  * - Metadata extraction for tenant context
@@ -41,7 +41,7 @@ std::string get_tenant_id(ServerContext* context) {
 }
 
 /**
- * Extract user ID from gRPC metadata  
+ * Extract user ID from gRPC metadata
  */
 int64_t get_user_id(ServerContext* context) {
     auto metadata = context->client_metadata();
@@ -68,12 +68,12 @@ public:
                      const multitenant::v1::GetTenantRequest* request,
                      multitenant::v1::GetTenantResponse* response) override {
         spdlog::info("GetTenant: {}", request->tenant_id());
-        
+
         auto tenant_opt = manager_.get_tenant(request->tenant_id());
         if (!tenant_opt) {
             return Status(StatusCode::NOT_FOUND, "Tenant not found");
         }
-        
+
         auto* tenant = response->mutable_tenant();
         tenant->set_id(tenant_opt->id);
         tenant->set_tenant_id(tenant_opt->tenant_id);
@@ -82,7 +82,7 @@ public:
         tenant->set_active(tenant_opt->active);
         tenant->set_created_at(tenant_opt->created_at);
         tenant->set_updated_at(tenant_opt->updated_at);
-        
+
         return Status::OK;
     }
 
@@ -90,9 +90,9 @@ public:
                        const multitenant::v1::ListTenantsRequest* request,
                        multitenant::v1::ListTenantsResponse* response) override {
         spdlog::info("ListTenants");
-        
+
         auto tenant_ids = manager_.get_active_tenant_ids();
-        
+
         for (const auto& id : tenant_ids) {
             if (auto tenant_opt = manager_.get_tenant(id)) {
                 auto* tenant = response->add_tenants();
@@ -103,13 +103,13 @@ public:
                 tenant->set_active(tenant_opt->active);
             }
         }
-        
+
         auto* pagination = response->mutable_pagination();
         pagination->set_page(1);
         pagination->set_page_size(static_cast<int>(tenant_ids.size()));
         pagination->set_total_items(static_cast<int>(tenant_ids.size()));
         pagination->set_total_pages(1);
-        
+
         return Status::OK;
     }
 
@@ -117,7 +117,7 @@ public:
                         const multitenant::v1::CreateTenantRequest* request,
                         multitenant::v1::CreateTenantResponse* response) override {
         spdlog::info("CreateTenant: {}", request->tenant_id());
-        
+
         try {
             repository::Tenant tenant{
                 .tenant_id = request->tenant_id(),
@@ -125,9 +125,9 @@ public:
                 .plan = request->plan().empty() ? "free" : request->plan(),
                 .active = true
             };
-            
+
             manager_.provision_tenant(tenant);
-            
+
             // Fetch the created tenant
             if (auto created = manager_.get_tenant(request->tenant_id())) {
                 auto* t = response->mutable_tenant();
@@ -137,7 +137,7 @@ public:
                 t->set_plan(created->plan);
                 t->set_active(created->active);
             }
-            
+
             return Status::OK;
         } catch (const std::exception& e) {
             return Status(StatusCode::INTERNAL, e.what());
@@ -147,9 +147,9 @@ public:
     Status DeleteTenant(ServerContext* context,
                         const multitenant::v1::DeleteTenantRequest* request,
                         multitenant::v1::DeleteTenantResponse* response) override {
-        spdlog::info("DeleteTenant: {} (permanent={})", 
+        spdlog::info("DeleteTenant: {} (permanent={})",
                      request->tenant_id(), request->permanent());
-        
+
         try {
             manager_.deprovision_tenant(request->tenant_id(), request->permanent());
             response->set_success(true);
@@ -179,18 +179,18 @@ public:
         if (tenant_id.empty()) {
             return Status(StatusCode::UNAUTHENTICATED, "Missing x-tenant-id header");
         }
-        
+
         spdlog::info("GetUser: {} (tenant={})", request->user_id(), tenant_id);
-        
+
         try {
             tenant::TenantScope scope(tenant_id);
             auto& pool = manager_.get_pool(tenant_id);
-            
+
             // Query user from tenant database
             auto conn = pool.acquire();
             auto stmt = conn->prepare("SELECT id, username, email, role, active, created_at, updated_at FROM users WHERE id = ?");
             stmt.bind(1, request->user_id());
-            
+
             if (stmt.step()) {
                 auto* user = response->mutable_user();
                 user->set_id(stmt.column<int64_t>(0));
@@ -202,7 +202,7 @@ public:
                 user->set_updated_at(stmt.column<std::string>(6));
                 return Status::OK;
             }
-            
+
             return Status(StatusCode::NOT_FOUND, "User not found");
         } catch (const std::exception& e) {
             return Status(StatusCode::INTERNAL, e.what());
@@ -216,21 +216,21 @@ public:
         if (tenant_id.empty()) {
             return Status(StatusCode::UNAUTHENTICATED, "Missing x-tenant-id header");
         }
-        
+
         spdlog::info("ListUsers (tenant={})", tenant_id);
-        
+
         try {
             auto& pool = manager_.get_pool(tenant_id);
             auto conn = pool.acquire();
-            
+
             std::string sql = "SELECT id, username, email, role, active, created_at, updated_at FROM users";
             if (request->active_only()) {
                 sql += " WHERE active = 1";
             }
             sql += " ORDER BY username";
-            
+
             auto stmt = conn->prepare(sql);
-            
+
             while (stmt.step()) {
                 auto* user = response->add_users();
                 user->set_id(stmt.column<int64_t>(0));
@@ -239,7 +239,7 @@ public:
                 user->set_role(stmt.column<std::string>(3));
                 user->set_active(stmt.column<int64_t>(4) != 0);
             }
-            
+
             return Status::OK;
         } catch (const std::exception& e) {
             return Status(StatusCode::INTERNAL, e.what());
@@ -253,33 +253,33 @@ public:
         if (tenant_id.empty()) {
             return Status(StatusCode::UNAUTHENTICATED, "Missing x-tenant-id header");
         }
-        
+
         spdlog::info("CreateUser: {} (tenant={})", request->username(), tenant_id);
-        
+
         try {
             auto& pool = manager_.get_pool(tenant_id);
             auto conn = pool.acquire();
-            
+
             auto stmt = conn->prepare(R"(
                 INSERT INTO users (username, email, password_hash, role, active, created_at, updated_at)
                 VALUES (?, ?, ?, ?, 1, datetime('now'), datetime('now'))
             )");
-            
+
             stmt.bind(1, request->username());
             stmt.bind(2, request->email());
             stmt.bind(3, request->password()); // In production, hash this!
             stmt.bind(4, request->role().empty() ? "user" : request->role());
             stmt.step();
-            
+
             int64_t user_id = conn->last_insert_rowid();
-            
+
             auto* user = response->mutable_user();
             user->set_id(user_id);
             user->set_username(request->username());
             user->set_email(request->email());
             user->set_role(request->role().empty() ? "user" : request->role());
             user->set_active(true);
-            
+
             return Status::OK;
         } catch (const std::exception& e) {
             return Status(StatusCode::INTERNAL, e.what());
@@ -293,7 +293,7 @@ public:
         if (tenant_id.empty()) {
             return Status(StatusCode::UNAUTHENTICATED, "Missing x-tenant-id header");
         }
-        
+
         // Simplified permission check - in production use proper RBAC
         response->set_allowed(true);
         return Status::OK;
@@ -317,7 +317,7 @@ void run_server(const std::string& address, tenant::TenantManager& manager) {
 
     std::unique_ptr<Server> server(builder.BuildAndStart());
     spdlog::info("Server listening on {}", address);
-    
+
     server->Wait();
 }
 
@@ -335,11 +335,11 @@ int main(int argc, char** argv) {
     try {
         // Initialize tenant manager
         tenant::TenantManager manager("system.db", "data/tenants/");
-        
+
         // Run server
         std::string address = "0.0.0.0:50051";
         run_server(address, manager);
-        
+
     } catch (const std::exception& e) {
         spdlog::error("Server error: {}", e.what());
         return 1;

@@ -1,6 +1,6 @@
 /**
  * Step 06: gRPC Client Implementation
- * 
+ *
  * Basic gRPC client demonstrating:
  * - Channel creation
  * - Stub usage
@@ -30,7 +30,7 @@ public:
         : stub_(multitenant::v1::TenantService::NewStub(channel))
     {}
 
-    bool CreateTenant(const std::string& tenant_id, 
+    bool CreateTenant(const std::string& tenant_id,
                       const std::string& name,
                       const std::string& plan) {
         multitenant::v1::CreateTenantRequest request;
@@ -44,12 +44,12 @@ public:
         Status status = stub_->CreateTenant(&context, request, &response);
 
         if (status.ok()) {
-            spdlog::info("Created tenant: {} (ID={})", 
-                         response.tenant().name(), 
+            spdlog::info("Created tenant: {} (ID={})",
+                         response.tenant().name(),
                          response.tenant().id());
             return true;
         } else {
-            spdlog::error("CreateTenant failed: {} - {}", 
+            spdlog::error("CreateTenant failed: {} - {}",
                           static_cast<int>(status.error_code()),
                           status.error_message());
             return false;
@@ -127,7 +127,7 @@ public:
 
         multitenant::v1::CreateUserResponse response;
         ClientContext context;
-        
+
         // Add tenant context as metadata
         context.AddMetadata("x-tenant-id", tenant_id_);
 
@@ -219,20 +219,20 @@ int main(int argc, char** argv) {
 
     // Tenant operations
     TenantClient tenant_client(channel);
-    
+
     spdlog::info("");
     spdlog::info("=== Tenant Operations ===");
-    
+
     tenant_client.CreateTenant("demo-corp", "Demo Corporation", "pro");
     tenant_client.GetTenant("demo-corp");
     tenant_client.ListTenants();
 
     // User operations (scoped to tenant)
     UserClient user_client(channel, "demo-corp");
-    
+
     spdlog::info("");
     spdlog::info("=== User Operations (tenant: demo-corp) ===");
-    
+
     user_client.CreateUser("alice", "alice@demo.com", "admin");
     user_client.CreateUser("bob", "bob@demo.com", "user");
     user_client.ListUsers();

@@ -101,12 +101,12 @@ Demonstrates that vcpkg dependencies work:
 
 int main() {
     spdlog::info("vcpkg integration working!");
-    
+
     nlohmann::json config = {
         {"database", "sqlite"},
         {"pool_size", 10}
     };
-    
+
     spdlog::info("Config: {}", config.dump(2));
     return 0;
 }

@@ -31,25 +31,25 @@ message Permission {
 service UserService {
     // Get a single user by ID
     rpc GetUser(GetUserRequest) returns (GetUserResponse);
-    
+
     // Get user by username
     rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserResponse);
-    
+
     // List all users in the tenant
     rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
-    
+
     // Create a new user
     rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-    
+
     // Update an existing user
     rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
-    
+
     // Delete (deactivate) a user
     rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
-    
+
     // Authentication
     rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
-    
+
     // Permission management
     rpc GetUserPermissions(GetUserPermissionsRequest) returns (GetUserPermissionsResponse);
     rpc GrantPermission(GrantPermissionRequest) returns (GrantPermissionResponse);

@@ -10,9 +10,9 @@ class Database;
 
 /**
  * RAII transaction wrapper.
- * 
+ *
  * Automatically rolls back if commit() is not called before destruction.
- * 
+ *
  * Usage:
  *   {
  *       auto tx = db.transaction();
@@ -38,7 +38,7 @@ public:
      * @param type Transaction type
      */
     explicit Transaction(sqlite3* db, Type type = Type::Deferred);
-    
+
     ~Transaction();
 
     // Move-only
@@ -66,16 +66,16 @@ public:
 private:
     sqlite3* db_ = nullptr;
     bool active_ = false;
-    
+
     void execute(const std::string& sql);
 };
 
 /**
  * Savepoint for nested transaction-like behavior.
- * 
+ *
  * SQLite doesn't support nested transactions, but savepoints
  * provide similar functionality.
- * 
+ *
  * Usage:
  *   auto tx = db.transaction();
  *   db.execute("INSERT ...");
@@ -96,7 +96,7 @@ public:
      * @param name Savepoint name (must be unique within transaction)
      */
     Savepoint(sqlite3* db, const std::string& name);
-    
+
     ~Savepoint();
 
     // Move-only
@@ -121,7 +121,7 @@ private:
     sqlite3* db_ = nullptr;
     std::string name_;
     bool active_ = false;
-    
+
     void execute(const std::string& sql);
 };
 

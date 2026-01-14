@@ -59,7 +59,7 @@ public:
             auto* metadata = methods->GetRecvInitialMetadata();
             // ...
         }
-        
+
         methods->Proceed();
     }
 };
@@ -73,13 +73,13 @@ public:
     void Intercept(InterceptorBatchMethods* methods) override {
         if (methods->QueryInterceptionHookPoint(POST_RECV_INITIAL_METADATA)) {
             auto* metadata = methods->GetRecvInitialMetadata();
-            
+
             // Extract and validate token
             auto auth_header = get_metadata(metadata, "authorization");
             if (!auth_header.empty()) {
                 auto token = parse_bearer_token(auth_header);
                 auto claims = validate_jwt(token);
-                
+
                 // Store claims in context
                 set_user_context(claims.user_id, claims.tenant_id);
             } else if (is_protected_method(methods->GetMethodName())) {
@@ -99,11 +99,11 @@ public:
 class TenantInterceptor : public ServerInterceptor {
 public:
     TenantInterceptor(TenantManager& manager) : manager_(manager) {}
-    
+
     void Intercept(InterceptorBatchMethods* methods) override {
         if (methods->QueryInterceptionHookPoint(POST_RECV_INITIAL_METADATA)) {
             auto* metadata = methods->GetRecvInitialMetadata();
-            
+
             auto tenant_id = get_metadata(metadata, "x-tenant-id");
             if (!tenant_id.empty()) {
                 // Validate tenant exists and is active
@@ -111,7 +111,7 @@ public:
                     methods->FailHijackedRecvMessage();
                     return;
                 }
-                
+
                 // Set tenant context for this request
                 TenantContext::set(tenant_id);
             }
@@ -130,7 +130,7 @@ public:
         if (methods->QueryInterceptionHookPoint(PRE_SEND_STATUS)) {
             auto status = methods->GetSendStatus();
             auto duration = get_request_duration();
-            
+
             spdlog::info("{} {} {} {}ms",
                 methods->GetMethodName(),
                 TenantContext::try_get_tenant_id().value_or("-"),
@@ -145,7 +145,7 @@ public:
 ### 5. Interceptor Factory
 
 ```cpp
-class InterceptorFactory 
+class InterceptorFactory
     : public grpc::experimental::ServerInterceptorFactoryInterface {
 public:
     grpc::experimental::Interceptor* CreateServerInterceptor(

@@ -22,7 +22,7 @@ Transaction::Transaction(sqlite3* db, Type type)
             sql = "BEGIN EXCLUSIVE";
             break;
     }
-    
+
     execute(sql);
     active_ = true;
     spdlog::trace("Transaction started");
@@ -80,7 +80,7 @@ void Transaction::rollback() {
 void Transaction::execute(const std::string& sql) {
     char* error_msg = nullptr;
     int result = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &error_msg);
-    
+
     if (result != SQLITE_OK) {
         std::string msg = error_msg ? error_msg : "Unknown error";
         sqlite3_free(error_msg);
@@ -155,7 +155,7 @@ void Savepoint::rollback() {
 void Savepoint::execute(const std::string& sql) {
     char* error_msg = nullptr;
     int result = sqlite3_exec(db_, sql.c_str(), nullptr, nullptr, &error_msg);
-    
+
     if (result != SQLITE_OK) {
         std::string msg = error_msg ? error_msg : "Unknown error";
         sqlite3_free(error_msg);
@@ -169,7 +169,7 @@ Database::Database(const DatabaseConfig& config)
     : config_(config)
 {
     int flags = 0;
-    
+
     if (config.read_only) {
         flags = SQLITE_OPEN_READONLY;
     } else {
@@ -178,24 +178,24 @@ Database::Database(const DatabaseConfig& config)
             flags |= SQLITE_OPEN_CREATE;
         }
     }
-    
+
     // Enable URI filenames and shared cache
     flags |= SQLITE_OPEN_URI;
-    
+
     int result = sqlite3_open_v2(config.path.c_str(), &db_, flags, nullptr);
-    
+
     if (result != SQLITE_OK) {
         std::string error_msg = db_ ? sqlite3_errmsg(db_) : "Unknown error";
         if (db_) {
             sqlite3_close(db_);
             db_ = nullptr;
         }
-        throw DatabaseException(result, 
+        throw DatabaseException(result,
             fmt::format("Failed to open database '{}': {}", config.path, error_msg));
     }
-    
+
     apply_pragmas();
-    
+
     spdlog::info("Opened database: {}", config.path);
 }
 
@@ -233,64 +233,64 @@ Database& Database::operator=(Database&& other) noexcept {
 void Database::apply_pragmas() {
     // Busy timeout
     execute(fmt::format("PRAGMA busy_timeout = {}", config_.busy_timeout_ms));
-    
+
     // Foreign keys
     if (config_.enable_foreign_keys) {
         execute("PRAGMA foreign_keys = ON");
     }
-    
+
     // WAL mode
     if (config_.enable_wal_mode && config_.path != ":memory:") {
         execute("PRAGMA journal_mode = WAL");
     }
-    
+
     // Synchronous mode
     execute(fmt::format("PRAGMA synchronous = {}", config_.synchronous));
-    
+
     spdlog::debug("Applied database pragmas");
 }
 
 void Database::execute(std::string_view sql) {
     char* error_msg = nullptr;
-    int result = sqlite3_exec(db_, std::string(sql).c_str(), 
+    int result = sqlite3_exec(db_, std::string(sql).c_str(),
                               nullptr, nullptr, &error_msg);
-    
+
     if (result != SQLITE_OK) {
         std::string msg = error_msg ? error_msg : "Unknown error";
         sqlite3_free(error_msg);
         throw_sqlite_error(result, fmt::format("Execute failed: {}", msg), db_);
     }
-    
+
     spdlog::trace("Executed: {}", sql);
 }
 
 void Database::execute_script(std::string_view sql) {
     const char* current = sql.data();
     const char* end = sql.data() + sql.size();
-    
+
     while (current < end) {
         sqlite3_stmt* stmt = nullptr;
         const char* tail = nullptr;
-        
-        int result = sqlite3_prepare_v2(db_, current, 
+
+        int result = sqlite3_prepare_v2(db_, current,
                                         static_cast<int>(end - current),
                                         &stmt, &tail);
-        
+
         if (result != SQLITE_OK) {
             throw_sqlite_error(result, "Failed to prepare script statement", db_);
         }
-        
+
         if (stmt) {
             result = sqlite3_step(stmt);
             sqlite3_finalize(stmt);
-            
+
             if (result != SQLITE_DONE && result != SQLITE_ROW) {
                 throw_sqlite_error(result, "Failed to execute script statement", db_);
             }
         }
-        
+
         current = tail;
-        
+
         // Skip whitespace
         while (current < end && std::isspace(*current)) {
             ++current;

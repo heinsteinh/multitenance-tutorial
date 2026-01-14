@@ -42,9 +42,9 @@ struct OrderByClause {
 
 /**
  * Specification for querying entities.
- * 
+ *
  * Encapsulates query criteria in a reusable, composable way.
- * 
+ *
  * Usage:
  *   Specification<User> spec;
  *   spec.where("tenant_id", "=", tenant_id)

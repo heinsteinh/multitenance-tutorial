@@ -155,7 +155,7 @@ Handlers translate between gRPC and domain types:
 ```cpp
 class UserHandler : public UserService::Service {
 public:
-    UserHandler(services::UserService& service) 
+    UserHandler(services::UserService& service)
         : service_(service) {}
 
     Status GetUser(ServerContext* context,
@@ -186,18 +186,18 @@ public:
         }
         return *user;
     }
-    
+
     User create_user(const CreateUserDto& dto) {
         // Validate
         if (dto.email.empty()) {
             throw ValidationException("Email required");
         }
-        
+
         // Check uniqueness
         if (email_exists(dto.email)) {
             throw ValidationException("Email already in use");
         }
-        
+
         // Create and store
         User user{
             .id = ++next_user_id_,
@@ -206,7 +206,7 @@ public:
             .role = dto.role,
             .active = true
         };
-        
+
         users_[user.id] = user;
         return user;
     }
@@ -320,8 +320,8 @@ Status map_exception_to_status(const std::exception& e) {
 
 ## Build Details
 
-**Build System:** CMake 3.21+  
-**Language:** C++20  
+**Build System:** CMake 3.21+
+**Language:** C++20
 **Dependencies:**
 - gRPC 1.60+
 - Protocol Buffers 4.25+

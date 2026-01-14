@@ -20,7 +20,7 @@ class Database {
 public:
     Database(const std::string& path);
     ~Database() { if (db_) sqlite3_close(db_); }
-    
+
     // Move-only semantics
     Database(Database&&) noexcept;
     Database& operator=(Database&&) noexcept;

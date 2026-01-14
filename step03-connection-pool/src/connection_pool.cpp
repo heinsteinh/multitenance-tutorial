@@ -50,7 +50,7 @@ ConnectionPool::ConnectionPool(const PoolConfig& config)
     config_.validate();
     spdlog::info("Creating connection pool for '{}' (min={}, max={})",
                  config_.db_path, config_.min_connections, config_.max_connections);
-    
+
     warm_pool();
 }
 
@@ -65,22 +65,22 @@ ConnectionPool::ConnectionPool(const std::string& db_path, size_t max_connection
 
 ConnectionPool::~ConnectionPool() {
     spdlog::debug("Shutting down connection pool");
-    
+
     {
         std::lock_guard<std::mutex> lock(mutex_);
         shutdown_ = true;
         pool_.clear();
     }
-    
+
     available_cv_.notify_all();
-    
+
     spdlog::info("Connection pool shutdown complete. Stats: {} created, {} acquisitions, {} timeouts",
                  total_created_.load(), total_acquisitions_.load(), timeouts_.load());
 }
 
 void ConnectionPool::warm_pool() {
     spdlog::debug("Warming pool with {} connections", config_.min_connections);
-    
+
     for (size_t i = 0; i < config_.min_connections; ++i) {
         try {
             auto conn = create_connection();
@@ -102,38 +102,38 @@ std::unique_ptr<db::Database> ConnectionPool::create_connection() {
         .enable_wal_mode = config_.enable_wal_mode,
         .synchronous = config_.synchronous
     };
-    
+
     auto conn = std::make_unique<db::Database>(db_config);
     ++total_created_;
-    
+
     spdlog::trace("Created new connection (total: {})", total_created_.load());
     return conn;
 }
 
 PooledConnection ConnectionPool::acquire() {
     auto start = std::chrono::steady_clock::now();
-    
+
     std::unique_lock<std::mutex> lock(mutex_);
-    
+
     if (shutdown_) {
         throw std::runtime_error("Connection pool is shut down");
     }
-    
+
     ++waiting_count_;
-    
+
     // Wait for available connection or room to create new one
     bool success = available_cv_.wait_for(lock, config_.acquire_timeout, [this] {
-        return shutdown_ || 
-               !pool_.empty() || 
+        return shutdown_ ||
+               !pool_.empty() ||
                (active_count_.load() < config_.max_connections);
     });
-    
+
     --waiting_count_;
-    
+
     if (shutdown_) {
         throw std::runtime_error("Connection pool is shut down");
     }
-    
+
     if (!success) {
         ++timeouts_;
         throw std::runtime_error(fmt::format(
@@ -143,14 +143,14 @@ PooledConnection ConnectionPool::acquire() {
             config_.max_connections
         ));
     }
-    
+
     std::unique_ptr<db::Database> conn;
-    
+
     if (!pool_.empty()) {
         // Get existing connection from pool
         conn = std::move(pool_.front());
         pool_.pop_front();
-        
+
         // Validate the connection
         if (!validate_connection(*conn)) {
             spdlog::warn("Connection failed health check, creating new one");
@@ -161,47 +161,47 @@ PooledConnection ConnectionPool::acquire() {
         // Create new connection
         conn = create_connection();
     }
-    
+
     ++active_count_;
     ++total_acquisitions_;
     update_peak();
-    
+
     // Track timing
     auto elapsed = std::chrono::steady_clock::now() - start;
     double elapsed_us = std::chrono::duration<double, std::micro>(elapsed).count();
-    
+
     // Update average (simple moving calculation)
     double total = total_acquire_time_us_.load() + elapsed_us;
     total_acquire_time_us_.store(total);
-    
+
     if (elapsed_us > max_acquire_time_us_.load()) {
         max_acquire_time_us_.store(elapsed_us);
     }
-    
-    spdlog::trace("Acquired connection (active={}, available={})", 
+
+    spdlog::trace("Acquired connection (active={}, available={})",
                   active_count_.load(), pool_.size());
-    
+
     // Create release function that captures 'this'
     auto release_func = [this](std::unique_ptr<db::Database> c) {
         this->release(std::move(c));
     };
-    
+
     return PooledConnection(std::move(conn), release_func);
 }
 
 std::optional<PooledConnection> ConnectionPool::try_acquire() {
     std::lock_guard<std::mutex> lock(mutex_);
-    
+
     if (shutdown_) {
         return std::nullopt;
     }
-    
+
     std::unique_ptr<db::Database> conn;
-    
+
     if (!pool_.empty()) {
         conn = std::move(pool_.front());
         pool_.pop_front();
-        
+
         if (!validate_connection(*conn)) {
             ++failed_health_checks_;
             // Try to create new connection if under limit
@@ -224,34 +224,34 @@ std::optional<PooledConnection> ConnectionPool::try_acquire() {
     } else {
         return std::nullopt;
     }
-    
+
     ++active_count_;
     ++total_acquisitions_;
     update_peak();
-    
+
     auto release_func = [this](std::unique_ptr<db::Database> c) {
         this->release(std::move(c));
     };
-    
+
     return PooledConnection(std::move(conn), release_func);
 }
 
 void ConnectionPool::release(std::unique_ptr<db::Database> conn) {
     if (!conn) return;
-    
+
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        
+
         --active_count_;
         ++total_releases_;
-        
+
         if (!shutdown_) {
             pool_.push_back(std::move(conn));
             spdlog::trace("Released connection (active={}, available={})",
                           active_count_.load(), pool_.size());
         }
     }
-    
+
     available_cv_.notify_one();
 }
 
@@ -268,12 +268,12 @@ bool ConnectionPool::validate_connection(db::Database& conn) {
 
 PoolStats ConnectionPool::stats() const {
     std::lock_guard<std::mutex> lock(mutex_);
-    
+
     size_t acquisitions = total_acquisitions_.load();
-    double avg_time = acquisitions > 0 
-        ? total_acquire_time_us_.load() / acquisitions 
+    double avg_time = acquisitions > 0
+        ? total_acquire_time_us_.load() / acquisitions
         : 0.0;
-    
+
     return PoolStats{
         .total_connections = total_created_.load(),
         .active_connections = active_count_.load(),
