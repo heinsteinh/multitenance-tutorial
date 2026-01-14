@@ -23,51 +23,51 @@ class Database;
  */
 class Transaction {
 public:
-    /**
-     * Transaction types
-     */
-    enum class Type {
-        Deferred,   // Lock acquired on first access (default)
-        Immediate,  // Write lock acquired immediately
-        Exclusive   // Exclusive lock acquired immediately
-    };
+  /**
+   * Transaction types
+   */
+  enum class Type {
+    Deferred,  // Lock acquired on first access (default)
+    Immediate, // Write lock acquired immediately
+    Exclusive  // Exclusive lock acquired immediately
+  };
 
-    /**
-     * Begin a transaction
-     * @param db Database handle
-     * @param type Transaction type
-     */
-    explicit Transaction(sqlite3* db, Type type = Type::Deferred);
+  /**
+   * Begin a transaction
+   * @param db Database handle
+   * @param type Transaction type
+   */
+  explicit Transaction(sqlite3 *db, Type type = Type::Deferred);
 
-    ~Transaction();
+  ~Transaction();
 
-    // Move-only
-    Transaction(Transaction&& other) noexcept;
-    Transaction& operator=(Transaction&& other) noexcept;
-    Transaction(const Transaction&) = delete;
-    Transaction& operator=(const Transaction&) = delete;
+  // Move-only
+  Transaction(Transaction &&other) noexcept;
+  Transaction &operator=(Transaction &&other) noexcept;
+  Transaction(const Transaction &) = delete;
+  Transaction &operator=(const Transaction &) = delete;
 
-    /**
-     * Commit the transaction
-     * @throws DatabaseException on failure
-     */
-    void commit();
+  /**
+   * Commit the transaction
+   * @throws DatabaseException on failure
+   */
+  void commit();
 
-    /**
-     * Rollback the transaction (also called automatically on destruction)
-     */
-    void rollback();
+  /**
+   * Rollback the transaction (also called automatically on destruction)
+   */
+  void rollback();
 
-    /**
-     * Check if transaction is still active
-     */
-    bool is_active() const { return active_; }
+  /**
+   * Check if transaction is still active
+   */
+  bool is_active() const { return active_; }
 
 private:
-    sqlite3* db_ = nullptr;
-    bool active_ = false;
+  sqlite3 *db_ = nullptr;
+  bool active_ = false;
 
-    void execute(const std::string& sql);
+  void execute(const std::string &sql);
 };
 
 /**
@@ -90,39 +90,39 @@ private:
  */
 class Savepoint {
 public:
-    /**
-     * Create a savepoint
-     * @param db Database handle
-     * @param name Savepoint name (must be unique within transaction)
-     */
-    Savepoint(sqlite3* db, const std::string& name);
+  /**
+   * Create a savepoint
+   * @param db Database handle
+   * @param name Savepoint name (must be unique within transaction)
+   */
+  Savepoint(sqlite3 *db, const std::string &name);
 
-    ~Savepoint();
+  ~Savepoint();
 
-    // Move-only
-    Savepoint(Savepoint&& other) noexcept;
-    Savepoint& operator=(Savepoint&& other) noexcept;
-    Savepoint(const Savepoint&) = delete;
-    Savepoint& operator=(const Savepoint&) = delete;
+  // Move-only
+  Savepoint(Savepoint &&other) noexcept;
+  Savepoint &operator=(Savepoint &&other) noexcept;
+  Savepoint(const Savepoint &) = delete;
+  Savepoint &operator=(const Savepoint &) = delete;
 
-    /**
-     * Release the savepoint (commits changes since savepoint)
-     */
-    void release();
+  /**
+   * Release the savepoint (commits changes since savepoint)
+   */
+  void release();
 
-    /**
-     * Rollback to the savepoint
-     */
-    void rollback();
+  /**
+   * Rollback to the savepoint
+   */
+  void rollback();
 
-    bool is_active() const { return active_; }
+  bool is_active() const { return active_; }
 
 private:
-    sqlite3* db_ = nullptr;
-    std::string name_;
-    bool active_ = false;
+  sqlite3 *db_ = nullptr;
+  std::string name_;
+  bool active_ = false;
 
-    void execute(const std::string& sql);
+  void execute(const std::string &sql);
 };
 
 } // namespace db

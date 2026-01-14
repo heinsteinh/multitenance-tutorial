@@ -24,50 +24,50 @@ class ConnectionPool;
  */
 class PooledConnection {
 public:
-    using ReleaseFunc = std::function<void(std::unique_ptr<db::Database>)>;
+  using ReleaseFunc = std::function<void(std::unique_ptr<db::Database>)>;
 
-    /**
-     * Create a pooled connection
-     * @param conn The database connection
-     * @param release Function to call when releasing
-     */
-    PooledConnection(std::unique_ptr<db::Database> conn, ReleaseFunc release);
+  /**
+   * Create a pooled connection
+   * @param conn The database connection
+   * @param release Function to call when releasing
+   */
+  PooledConnection(std::unique_ptr<db::Database> conn, ReleaseFunc release);
 
-    ~PooledConnection();
+  ~PooledConnection();
 
-    // Move-only
-    PooledConnection(PooledConnection&& other) noexcept;
-    PooledConnection& operator=(PooledConnection&& other) noexcept;
-    PooledConnection(const PooledConnection&) = delete;
-    PooledConnection& operator=(const PooledConnection&) = delete;
+  // Move-only
+  PooledConnection(PooledConnection &&other) noexcept;
+  PooledConnection &operator=(PooledConnection &&other) noexcept;
+  PooledConnection(const PooledConnection &) = delete;
+  PooledConnection &operator=(const PooledConnection &) = delete;
 
-    // Pointer-like access
-    db::Database* operator->() { return conn_.get(); }
-    const db::Database* operator->() const { return conn_.get(); }
+  // Pointer-like access
+  db::Database *operator->() { return conn_.get(); }
+  const db::Database *operator->() const { return conn_.get(); }
 
-    db::Database& operator*() { return *conn_; }
-    const db::Database& operator*() const { return *conn_; }
+  db::Database &operator*() { return *conn_; }
+  const db::Database &operator*() const { return *conn_; }
 
-    /**
-     * Get the underlying database pointer
-     */
-    db::Database* get() { return conn_.get(); }
-    const db::Database* get() const { return conn_.get(); }
+  /**
+   * Get the underlying database pointer
+   */
+  db::Database *get() { return conn_.get(); }
+  const db::Database *get() const { return conn_.get(); }
 
-    /**
-     * Check if connection is valid
-     */
-    explicit operator bool() const { return conn_ != nullptr; }
+  /**
+   * Check if connection is valid
+   */
+  explicit operator bool() const { return conn_ != nullptr; }
 
-    /**
-     * Release connection back to pool early
-     * After this call, the connection is no longer usable
-     */
-    void release();
+  /**
+   * Release connection back to pool early
+   * After this call, the connection is no longer usable
+   */
+  void release();
 
 private:
-    std::unique_ptr<db::Database> conn_;
-    ReleaseFunc release_func_;
+  std::unique_ptr<db::Database> conn_;
+  ReleaseFunc release_func_;
 };
 
 } // namespace pool

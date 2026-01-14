@@ -38,9 +38,7 @@ std::string find_config_file(int argc, char *argv[]) {
 
   // Check default locations
   std::vector<std::string> default_paths = {
-      "config/config.json",
-      "../config/config.json",
-      "../../config/config.json",
+      "config/config.json", "../config/config.json", "../../config/config.json",
       "/etc/multitenant/config.json"};
 
   for (const auto &path : default_paths) {
@@ -70,11 +68,11 @@ int main(int argc, char *argv[]) {
     // Apply logging configuration
     app_config.apply_logging_config();
 
-    spdlog::info(
-        "\n\n╔════════════════════════════════════════════╗\n║  Step "
-        "10: Complete System             "
-        "║\n║  Environment: {:<28}║\n╚════════════════════════════════════════════╝",
-        app_config.environment);
+    spdlog::info("\n\n╔════════════════════════════════════════════╗\n║  Step "
+                 "10: Complete System             "
+                 "║\n║  Environment: "
+                 "{:<28}║\n╚════════════════════════════════════════════╝",
+                 app_config.environment);
 
     spdlog::info("Configuration loaded:");
     spdlog::info("  Server: {}", app_config.get_server_address());
@@ -109,8 +107,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Register interceptors
-    std::vector<std::unique_ptr<
-        grpc::experimental::ServerInterceptorFactoryInterface>>
+    std::vector<
+        std::unique_ptr<grpc::experimental::ServerInterceptorFactoryInterface>>
         interceptor_factories;
     interceptor_factories.push_back(
         std::make_unique<multitenant::InterceptorFactory>());

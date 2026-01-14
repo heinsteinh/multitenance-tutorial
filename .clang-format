@@ -1,5 +1,4 @@
----
-Language:        Cpp
+Language: Cpp
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: Consecutive
@@ -7,7 +6,7 @@ AlignConsecutiveAssignments: Consecutive
 #AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Right
-AlignOperands:   true
+AlignOperands: true
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
@@ -26,21 +25,21 @@ AlwaysBreakTemplateDeclarations: No
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:
-  AfterCaseLabel:  true
-  AfterClass:      true
+  AfterCaseLabel: true
+  AfterClass: true
   AfterControlStatement: Always
-  AfterEnum:       true
-  AfterFunction:   true
-  AfterNamespace:  true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
   AfterObjCDeclaration: false
-  AfterStruct:     true
-  AfterUnion:      true
+  AfterStruct: true
+  AfterUnion: true
   AfterExternBlock: false
-  BeforeCatch:     true
-  BeforeElse:      true
+  BeforeCatch: true
+  BeforeElse: true
   BeforeLambdaBody: true
   #BeforeWhile:     true
-  IndentBraces:    false
+  IndentBraces: false
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
@@ -53,8 +52,8 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeComma
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
-ColumnLimit:     0
-CommentPragmas:  '^ IWYU pragma:'
+ColumnLimit: 0
+CommentPragmas: '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
@@ -62,44 +61,44 @@ ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DeriveLineEnding: true
 DerivePointerAlignment: false
-DisableFormat:   false
+DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 ForEachMacros:
-  - foreach
-  - Q_FOREACH
-  - BOOST_FOREACH
-IncludeBlocks:   Regroup
+- foreach
+- Q_FOREACH
+- BOOST_FOREACH
+IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex:           '^"(llvm|llvm-c|clang|clang-c)/'
-    Priority:        2
-    SortPriority:    0
-  - Regex:           '^(<|"(gtest|gmock|isl|json|doctest)/)'
-    Priority:        3
-    SortPriority:    0
-  - Regex:           '.*'
-    Priority:        1
-    SortPriority:    0
-IncludeIsMainRegex: '(tst_)?$'
+- Regex: ^"(llvm|llvm-c|clang|clang-c)/
+  Priority: 2
+  SortPriority: 0
+- Regex: ^(<|"(gtest|gmock|isl|json|doctest)/)
+  Priority: 3
+  SortPriority: 0
+- Regex: .*
+  Priority: 1
+  SortPriority: 0
+IncludeIsMainRegex: (tst_)?$
 IncludeIsMainSourceRegex: ''
 IndentCaseLabels: false
 #IndentCaseBlocks: false
 IndentGotoLabels: true
 IndentPPDirectives: None
 #IndentExternBlock: AfterExternBlock
-IndentWidth:     4
+IndentWidth: 4
 IndentWrappedFunctionNames: false
 #InsertTrailingCommas: None
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 MacroBlockBegin: ''
-MacroBlockEnd:   ''
+MacroBlockEnd: ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
 PointerAlignment: Left
-ReflowComments:  true
-SortIncludes:    true
+ReflowComments: true
+SortIncludes: true
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
@@ -113,27 +112,27 @@ SpaceBeforeRangeBasedForLoopColon: true
 SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
-SpacesInAngles:  false
+SpacesInAngles: false
 SpacesInConditionalStatement: false
 SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
-Standard:        Auto
+Standard: Auto
 StatementMacros:
-  - Q_ASSERT
-  - Q_ASSERT_X
-  - DCHECK
-  - DCHECK_EQ
-  - DCHECK_NE
-  - DCHECK_LT
-  - DCHECK_LE
-  - DCHECK_GT
-  - DCHECK_GE
-TabWidth:        4
-UseCRLF:         false
-UseTab:          Never
+- Q_ASSERT
+- Q_ASSERT_X
+- DCHECK
+- DCHECK_EQ
+- DCHECK_NE
+- DCHECK_LT
+- DCHECK_LE
+- DCHECK_GT
+- DCHECK_GE
+TabWidth: 4
+UseCRLF: false
+UseTab: Never
 #WhitespaceSensitiveMacros:
   #- STRINGIZE
   #- PP_STRINGIZE

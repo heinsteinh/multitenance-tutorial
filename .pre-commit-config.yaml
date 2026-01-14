@@ -6,96 +6,96 @@ default_language_version:
 
 repos:
   # General file checks
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
       # Check for merge conflicts
-      - id: check-merge-conflict
-        name: Check for merge conflicts
-      
-      # Trim trailing whitespace
-      - id: trailing-whitespace
-        name: Trim trailing whitespace
-      
-      # Fix end of file newlines
-      - id: end-of-file-fixer
-        name: Fix end of file newlines
-      
-      # Check YAML files
-      - id: check-yaml
-        name: Check YAML syntax
-        args: [--unsafe]
-      
-      # Check JSON files
-      - id: check-json
-        name: Check JSON syntax
-      
-      # Check large files
-      - id: check-added-large-files
-        name: Check for large files
-        args: [--maxkb=10000]
-      
-      # Detect private keys
-      - id: detect-private-key
-        name: Detect private keys
-      
-      # Check case conflicts
-      - id: check-case-conflict
-        name: Check for case conflicts in filenames
-      
-      # Fix mixed line endings
-      - id: mixed-line-ending
-        name: Fix mixed line endings
-        args: [--fix=lf]
+  - id: check-merge-conflict
+    name: Check for merge conflicts
 
-  # C/C++ code formatting with clang-format
-  - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v17.0.6
-    hooks:
-      - id: clang-format
-        name: Format C/C++ code with clang-format
-        types: [c++, c]
-        args: [-i, -style=LLVM]
+      # Trim trailing whitespace
+  - id: trailing-whitespace
+    name: Trim trailing whitespace
+
+      # Fix end of file newlines
+  - id: end-of-file-fixer
+    name: Fix end of file newlines
+
+      # Check YAML files
+  - id: check-yaml
+    name: Check YAML syntax
+    args: [--unsafe]
+
+      # Check JSON files
+  - id: check-json
+    name: Check JSON syntax
+
+      # Check large files
+  - id: check-added-large-files
+    name: Check for large files
+    args: [--maxkb=10000]
+
+      # Detect private keys
+  - id: detect-private-key
+    name: Detect private keys
+
+      # Check case conflicts
+  - id: check-case-conflict
+    name: Check for case conflicts in filenames
+
+      # Fix mixed line endings
+  - id: mixed-line-ending
+    name: Fix mixed line endings
+    args: [--fix=lf]
+
+  # C/C++ code formatting with clang-format (system version)
+- repo: local
+  hooks:
+  - id: clang-format
+    name: Format C/C++ code with clang-format
+    entry: clang-format -i -style=LLVM
+    language: system
+    files: \.(cpp|cc|cxx|c\+\+|hpp|h|hxx)$
 
   # CMake formatting
-  - repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: v0.6.13
-    hooks:
-      - id: cmake-format
-        name: Format CMake files
-        types: [cmake]
-        additional_dependencies: ['pyyaml>=5.1']
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.13
+  hooks:
+  - id: cmake-format
+    name: Format CMake files
+    types: [cmake]
+    additional_dependencies: [pyyaml>=5.1]
 
   # YAML formatting
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.12.0
-    hooks:
-      - id: pretty-format-yaml
-        name: Format YAML files
-        args: [--autofix, --indent, "2"]
-        types: [yaml]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.12.0
+  hooks:
+  - id: pretty-format-yaml
+    name: Format YAML files
+    args: [--autofix, --indent, '2']
+    types: [yaml]
 
   # Shell script linting
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.5
-    hooks:
-      - id: shellcheck
-        name: Check shell scripts
-        types: [shell]
-        args: [-x]
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.9.0.5
+  hooks:
+  - id: shellcheck
+    name: Check shell scripts
+    types: [shell]
+    args: [-x]
 
   # JSON Schema validation
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: check-json
-        name: Validate JSON files
-        files: |
-          (?x)^(
-            .*vcpkg\.json|
-            .*config\.json|
-            .*config\..*\.json
-          )$
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+  - id: check-json
+    name: Validate JSON files
+    files: |
+      (?x)^(
+        .*vcpkg\.json|
+        .*config\.json|
+        .*config\..*\.json
+      )$
 
 # Configuration options
 exclude: |
@@ -111,7 +111,7 @@ exclude: |
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks
-    
+
     for more information, see https://pre-commit.ci
   autofix_prs: true
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'

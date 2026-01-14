@@ -1,8 +1,8 @@
 #pragma once
 
+#include <sqlite3.h>
 #include <stdexcept>
 #include <string>
-#include <sqlite3.h>
 
 namespace db {
 
@@ -11,15 +11,13 @@ namespace db {
  */
 class DatabaseException : public std::runtime_error {
 public:
-    DatabaseException(int error_code, const std::string& message)
-        : std::runtime_error(message)
-        , error_code_(error_code)
-    {}
+  DatabaseException(int error_code, const std::string &message)
+      : std::runtime_error(message), error_code_(error_code) {}
 
-    int error_code() const noexcept { return error_code_; }
+  int error_code() const noexcept { return error_code_; }
 
 private:
-    int error_code_;
+  int error_code_;
 };
 
 /**
@@ -27,9 +25,8 @@ private:
  */
 class ConstraintException : public DatabaseException {
 public:
-    ConstraintException(const std::string& message)
-        : DatabaseException(SQLITE_CONSTRAINT, message)
-    {}
+  ConstraintException(const std::string &message)
+      : DatabaseException(SQLITE_CONSTRAINT, message) {}
 };
 
 /**
@@ -37,9 +34,8 @@ public:
  */
 class BusyException : public DatabaseException {
 public:
-    BusyException(const std::string& message)
-        : DatabaseException(SQLITE_BUSY, message)
-    {}
+  BusyException(const std::string &message)
+      : DatabaseException(SQLITE_BUSY, message) {}
 };
 
 /**
@@ -47,9 +43,8 @@ public:
  */
 class NotFoundException : public DatabaseException {
 public:
-    NotFoundException(const std::string& message)
-        : DatabaseException(SQLITE_NOTFOUND, message)
-    {}
+  NotFoundException(const std::string &message)
+      : DatabaseException(SQLITE_NOTFOUND, message) {}
 };
 
 /**
@@ -57,35 +52,35 @@ public:
  */
 class TypeException : public DatabaseException {
 public:
-    TypeException(const std::string& message)
-        : DatabaseException(SQLITE_MISMATCH, message)
-    {}
+  TypeException(const std::string &message)
+      : DatabaseException(SQLITE_MISMATCH, message) {}
 };
 
 /**
  * Helper to create appropriate exception from SQLite error code
  */
-inline void throw_sqlite_error(int error_code, const std::string& context, sqlite3* db = nullptr) {
-    std::string message = context;
-    if (db) {
-        message += ": ";
-        message += sqlite3_errmsg(db);
-    }
+inline void throw_sqlite_error(int error_code, const std::string &context,
+                               sqlite3 *db = nullptr) {
+  std::string message = context;
+  if (db) {
+    message += ": ";
+    message += sqlite3_errmsg(db);
+  }
 
-    switch (error_code) {
-        case SQLITE_CONSTRAINT:
-        case SQLITE_CONSTRAINT_UNIQUE:
-        case SQLITE_CONSTRAINT_PRIMARYKEY:
-        case SQLITE_CONSTRAINT_FOREIGNKEY:
-            throw ConstraintException(message);
+  switch (error_code) {
+  case SQLITE_CONSTRAINT:
+  case SQLITE_CONSTRAINT_UNIQUE:
+  case SQLITE_CONSTRAINT_PRIMARYKEY:
+  case SQLITE_CONSTRAINT_FOREIGNKEY:
+    throw ConstraintException(message);
 
-        case SQLITE_BUSY:
-        case SQLITE_LOCKED:
-            throw BusyException(message);
+  case SQLITE_BUSY:
+  case SQLITE_LOCKED:
+    throw BusyException(message);
 
-        default:
-            throw DatabaseException(error_code, message);
-    }
+  default:
+    throw DatabaseException(error_code, message);
+  }
 }
 
 } // namespace db
