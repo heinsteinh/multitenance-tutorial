@@ -89,18 +89,6 @@ auto spec = UserSpec::builder()
 auto users = userRepo.find_by(spec);
 ```
 
-### 4. Query Builder
-
-```cpp
-auto results = QueryBuilder<User>(conn)
-    .select("id", "name", "email")
-    .where("tenant_id = ?", tenant_id)
-    .where("active = ?", true)
-    .order_by("name")
-    .limit(100)
-    .execute();
-```
-
 ## Project Structure
 
 ```
@@ -109,43 +97,47 @@ step04-repository-pattern/
 ├── vcpkg.json
 ├── include/
 │   └── repository/
-│       ├── entity.hpp          # Entity base and macros
-│       ├── repository.hpp      # Generic repository
-│       ├── specification.hpp   # Specification pattern
-│       ├── query_builder.hpp   # Fluent query builder
-│       └── mapper.hpp          # Entity-row mapping
+│       ├── entity.hpp          # Entity base and concept definition
+│       ├── repository.hpp      # Generic repository template
+│       ├── specification.hpp   # Specification pattern for queries
+│       └── user_repository.hpp # Concrete entities and repositories
 ├── src/
-│   ├── repository.cpp
-│   └── main.cpp
+│   └── main.cpp                # Demo application
 └── tests/
-    └── repository_test.cpp
+    └── repository_test.cpp     # Comprehensive test suite
 ```
+
+**Note:** The implementation is header-only. Entity mapping is done manually in
+concrete repository classes (e.g., `UserRepository`, `TenantRepository`) since
+C++ lacks runtime reflection. The Specification pattern provides fluent query
+building capabilities.
 
 ## Entity Mapping
 
-The system maps between C++ structs and database rows:
+Each concrete repository implements mapping between C++ structs and database rows:
 
 ```cpp
-// Automatic column mapping
-template<typename Entity>
-Entity EntityMapper<Entity>::from_row(Statement& stmt) {
-    Entity entity;
-    int col = 0;
-    for_each_field(entity, [&](auto& field) {
-        field = stmt.column<decltype(field)>(col++);
-    });
-    return entity;
+// In UserRepository - manual mapping implementation
+User map_from_row(db::Statement& stmt) const override {
+    return User{
+        .id = stmt.column<int64_t>(0),
+        .tenant_id = stmt.column<std::string>(1),
+        .username = stmt.column<std::string>(2),
+        .email = stmt.column<std::string>(3),
+        // ... remaining fields
+    };
 }
 
-// Automatic parameter binding
-template<typename Entity>
-void EntityMapper<Entity>::bind_values(Statement& stmt, const Entity& entity) {
-    int param = 1;
-    for_each_field(entity, [&](const auto& field) {
-        stmt.bind(param++, field);
-    });
+void bind_insert_values(db::Statement& stmt, const User& user) const override {
+    stmt.bind(1, user.tenant_id);
+    stmt.bind(2, user.username);
+    stmt.bind(3, user.email);
+    // ... remaining bindings
 }
 ```
+
+This approach provides type safety while working within C++'s lack of
+runtime reflection.
 
 ## Building
 

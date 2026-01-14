@@ -66,12 +66,18 @@ target_compile_options(
   step04_demo PRIVATE $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
                       $<$<CXX_COMPILER_ID:MSVC>:/W4>)
 
-# Tests (commented out - no tests directory yet) add_executable(step04_tests
-# tests/repository_test.cpp )
-#
-# target_link_libraries(step04_tests PRIVATE repository Catch2::Catch2WithMain )
-#
-# include(CTest) include(Catch) catch_discover_tests(step04_tests)
+# Tests
+add_executable(step04_tests tests/repository_test.cpp)
+
+target_link_libraries(step04_tests PRIVATE repository Catch2::Catch2WithMain)
+
+target_compile_options(
+  step04_tests PRIVATE $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
+                       $<$<CXX_COMPILER_ID:MSVC>:/W4>)
+
+include(CTest)
+include(Catch)
+catch_discover_tests(step04_tests)
 
 message(STATUS "")
 message(STATUS "=== Step 04: Repository Pattern ===")

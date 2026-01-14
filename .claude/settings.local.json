@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(VCPKG_ROOT=\"$HOME/vcpkg\" cmake:*)",
+      "Bash(cmake --build:*)",
+      "Bash(/Users/fkheinstein/Projects/DevOps/cpp-multitenant-tutorial/step04-repository-pattern/build/step04_tests:*)",
+      "Bash(/Users/fkheinstein/Projects/DevOps/cpp-multitenant-tutorial/step04-repository-pattern/build/step04_demo)"
     ]
   }
 }
