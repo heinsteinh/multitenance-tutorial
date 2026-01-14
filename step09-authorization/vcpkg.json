@@ -1,13 +1,16 @@
 {
-  "name": "step07-grpc-services",
+  "name": "step09-authorization",
   "version-string": "1.0.0",
-  "description": "Step 07: gRPC service layer with handlers and DTOs",
+  "description": "Step 09: RBAC, JWT validation, and policy engine",
   "dependencies": [
     "spdlog",
     "fmt",
     "grpc",
     "protobuf",
-    "catch2"
+    "catch2",
+    "jwt-cpp",
+    "nlohmann-json",
+    "sqlite3"
   ],
   "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289"
 }

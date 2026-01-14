@@ -1,24 +1,35 @@
 #pragma once
 
+#include "interceptors/auth_interceptor.hpp"
+#include "interceptors/logging_interceptor.hpp"
+#include "interceptors/tenant_interceptor.hpp"
+
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/support/server_interceptor.h>
 #include <memory>
 #include <vector>
 
-#include "interceptors/auth_interceptor.hpp"
-#include "interceptors/logging_interceptor.hpp"
-#include "interceptors/tenant_interceptor.hpp"
+namespace auth
+{
+    class JwtValidator;
+}
 
-namespace multitenant {
+namespace multitenant
+{
 
-// Factory for creating interceptor chains
-class InterceptorFactory
-    : public grpc::experimental::ServerInterceptorFactoryInterface {
-public:
-  InterceptorFactory() = default;
+    // Factory for creating interceptor chains
+    class InterceptorFactory
+        : public grpc::experimental::ServerInterceptorFactoryInterface
+    {
+    public:
+        explicit InterceptorFactory(
+            std::shared_ptr<auth::JwtValidator> jwt_validator = nullptr);
 
-  grpc::experimental::Interceptor *
-  CreateServerInterceptor(grpc::experimental::ServerRpcInfo *info) override;
-};
+        grpc::experimental::Interceptor*
+        CreateServerInterceptor(grpc::experimental::ServerRpcInfo* info) override;
+
+    private:
+        std::shared_ptr<auth::JwtValidator> jwt_validator_;
+    };
 
 } // namespace multitenant

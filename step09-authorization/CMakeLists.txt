@@ -21,6 +21,11 @@ find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
+
+# jwt-cpp is header-only, include from vcpkg
+set(JWT_CPP_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/arm64-osx/include")
 
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/proto)
 set(PROTO_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
@@ -81,12 +86,13 @@ target_include_directories(proto_lib PUBLIC ${PROTO_OUTPUT_DIR})
 target_link_libraries(proto_lib PUBLIC protobuf::libprotobuf gRPC::grpc++)
 
 add_library(service_lib src/services/user_service.cpp
-                        src/services/tenant_service.cpp src/services/mapper.cpp)
+                        src/services/tenant_service.cpp src/services/mapper.cpp
+                        src/services/auth_service.cpp)
 add_dependencies(service_lib proto_gen)
 
 target_include_directories(service_lib PUBLIC include ${PROTO_OUTPUT_DIR})
 
-target_link_libraries(service_lib PUBLIC proto_lib spdlog::spdlog fmt::fmt)
+target_link_libraries(service_lib PUBLIC proto_lib spdlog::spdlog fmt::fmt auth_lib)
 
 add_library(
   interceptor_lib
@@ -99,16 +105,33 @@ add_dependencies(interceptor_lib proto_gen)
 
 target_include_directories(interceptor_lib PUBLIC include ${PROTO_OUTPUT_DIR})
 
-target_link_libraries(interceptor_lib PUBLIC proto_lib spdlog::spdlog fmt::fmt)
+target_link_libraries(interceptor_lib PUBLIC proto_lib spdlog::spdlog fmt::fmt auth_lib)
 
 add_library(handler_lib src/handlers/user_handler.cpp
-                        src/handlers/tenant_handler.cpp)
+                        src/handlers/tenant_handler.cpp
+                        src/handlers/auth_handler.cpp)
 add_dependencies(handler_lib proto_gen)
 
 target_include_directories(handler_lib PUBLIC include ${PROTO_OUTPUT_DIR})
 
 target_link_libraries(handler_lib PUBLIC proto_lib service_lib spdlog::spdlog
-                                         fmt::fmt)
+                                         fmt::fmt auth_lib)
+
+# Authorization library with RBAC, JWT, and policy engine
+add_library(auth_lib
+            src/auth/authorization_service.cpp
+            src/auth/jwt_validator.cpp
+            src/auth/policy_engine.cpp
+            src/auth/role_repository.cpp
+            src/db/database.cpp
+            src/db/statement.cpp)
+
+target_include_directories(auth_lib PUBLIC include ${JWT_CPP_INCLUDE_DIR})
+
+target_link_libraries(
+  auth_lib
+  PUBLIC spdlog::spdlog fmt::fmt nlohmann_json::nlohmann_json
+         unofficial::sqlite3::sqlite3)
 
 add_executable(step09_server src/main.cpp)
 add_dependencies(step09_server proto_gen)
@@ -116,7 +139,7 @@ add_dependencies(step09_server proto_gen)
 target_include_directories(step09_server PRIVATE include ${PROTO_OUTPUT_DIR})
 
 target_link_libraries(
-  step09_server PRIVATE interceptor_lib handler_lib service_lib proto_lib
+  step09_server PRIVATE interceptor_lib handler_lib service_lib auth_lib proto_lib
                         spdlog::spdlog fmt::fmt)
 
 # Tests
@@ -131,8 +154,9 @@ target_include_directories(grpc_authorization_test PRIVATE include
                                                            ${PROTO_OUTPUT_DIR})
 
 target_link_libraries(
-  grpc_authorization_test PRIVATE proto_lib service_lib Catch2::Catch2WithMain
-                                  gRPC::grpc++ spdlog::spdlog)
+  grpc_authorization_test PRIVATE proto_lib service_lib auth_lib
+                                  Catch2::Catch2WithMain gRPC::grpc++
+                                  spdlog::spdlog)
 
 add_test(NAME GrpcAuthorizationTest COMMAND grpc_authorization_test)
 
