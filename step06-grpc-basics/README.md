@@ -1,13 +1,15 @@
 # Step 06: gRPC Basics
 
-This step introduces gRPC for building high-performance RPC services.
+This step introduces gRPC for building high-performance RPC services with full
+CRUD operations and permission management.
 
 ## What's New in This Step
 
 - Protocol Buffers (protobuf) definitions
-- gRPC service definitions
+- gRPC service definitions with 16 RPC methods
 - Code generation with CMake
-- Basic client/server implementation
+- Full server implementation with database integration
+- Client demonstration
 - vcpkg integration for gRPC
 
 ## Why gRPC?
@@ -103,6 +105,35 @@ GetUserResponse response;
 auto status = stub->GetUser(&context, request, &response);
 ```
 
+## Implemented RPC Methods
+
+### TenantService (6 methods)
+
+| Method | Description |
+|--------|-------------|
+| `GetTenant` | Retrieve tenant by ID |
+| `ListTenants` | List all active tenants with pagination |
+| `CreateTenant` | Create and provision a new tenant |
+| `UpdateTenant` | Update tenant name, plan, or active status |
+| `DeleteTenant` | Soft or permanent tenant deletion |
+| `ProvisionTenant` | Provision tenant database |
+
+### UserService (10 methods)
+
+| Method | Description |
+|--------|-------------|
+| `GetUser` | Retrieve user by ID |
+| `GetUserByUsername` | Find user by username |
+| `ListUsers` | List users with optional active filter |
+| `CreateUser` | Create a new user |
+| `UpdateUser` | Update user fields (username, email, password, role, active) |
+| `DeleteUser` | Soft or permanent user deletion |
+| `Authenticate` | Verify credentials and return token |
+| `GetUserPermissions` | List all permissions for a user |
+| `GrantPermission` | Grant a permission to a user |
+| `RevokePermission` | Revoke a permission from a user |
+| `CheckPermission` | Check if user has specific permission |
+
 ## Project Structure
 
 ```
@@ -110,42 +141,17 @@ step06-grpc-basics/
 ├── CMakeLists.txt
 ├── vcpkg.json
 ├── proto/
-│   ├── common.proto          # Common types
-│   ├── tenant.proto          # Tenant service
-│   └── user.proto            # User service
-├── include/
-│   └── grpc/
-│       └── proto_utils.hpp   # Proto conversion utilities
+│   ├── tenant.proto          # Tenant service definition
+│   └── user.proto            # User service definition
 ├── src/
-│   ├── server.cpp            # gRPC server
-│   ├── client.cpp            # gRPC client
-│   └── main.cpp
+│   ├── server.cpp            # Full gRPC server implementation
+│   ├── client.cpp            # gRPC client demonstration
+│   └── main.cpp              # Protobuf message demo
 └── tests/
-    └── grpc_test.cpp
+    └── grpc_test.cpp         # Unit tests (8 test cases)
 ```
 
 ## Proto Files
-
-### common.proto
-```protobuf
-syntax = "proto3";
-package multitenant.v1;
-
-message Timestamp {
-    int64 seconds = 1;
-    int32 nanos = 2;
-}
-
-message Pagination {
-    int32 page = 1;
-    int32 page_size = 2;
-}
-
-message Error {
-    int32 code = 1;
-    string message = 2;
-}
-```
 
 ### tenant.proto
 ```protobuf
@@ -154,8 +160,31 @@ package multitenant.v1;
 
 service TenantService {
     rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
-    rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
     rpc ListTenants(ListTenantsRequest) returns (ListTenantsResponse);
+    rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+    rpc UpdateTenant(UpdateTenantRequest) returns (UpdateTenantResponse);
+    rpc DeleteTenant(DeleteTenantRequest) returns (DeleteTenantResponse);
+    rpc ProvisionTenant(ProvisionTenantRequest) returns (ProvisionTenantResponse);
+}
+```
+
+### user.proto
+```protobuf
+syntax = "proto3";
+package multitenant.v1;
+
+service UserService {
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserResponse);
+    rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+    rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+    rpc GetUserPermissions(GetUserPermissionsRequest) returns (GetUserPermissionsResponse);
+    rpc GrantPermission(GrantPermissionRequest) returns (GrantPermissionResponse);
+    rpc RevokePermission(RevokePermissionRequest) returns (RevokePermissionResponse);
+    rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
 }
 ```
 
@@ -166,7 +195,14 @@ service TenantService {
 cmake --preset=default
 cmake --build build
 
-# Run server
+# Run tests
+./build/step06_test
+# Output: All tests passed (25 assertions in 8 test cases)
+
+# Run demo
+./build/step06_demo
+
+# Run server (in one terminal)
 ./build/step06_server
 
 # Run client (in another terminal)
