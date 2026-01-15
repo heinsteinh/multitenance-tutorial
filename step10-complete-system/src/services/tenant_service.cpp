@@ -2,98 +2,196 @@
 
 #include <algorithm>
 
-namespace services {
+namespace services
+{
 
-TenantService::TenantService() : next_id_(1) {
-  // seed with a default tenant for demo purposes
-  TenantModel demo{
-      .id = next_id_++,
-      .tenant_id = "demo",
-      .name = "Demo Tenant",
-      .plan = "basic",
-      .active = true,
-  };
-  tenants_.push_back(demo);
-}
+    TenantService::TenantService(std::shared_ptr<repository::TenantRepository> repository)
+        : repository_(std::move(repository))
+        , use_memory_(false)
+    {
+    }
 
-TenantModel TenantService::get_tenant(const std::string &tenant_id) const {
-  auto it =
-      std::find_if(tenants_.begin(), tenants_.end(), [&](const TenantModel &t) {
-        return t.tenant_id == tenant_id;
-      });
-  if (it == tenants_.end()) {
-    throw NotFoundException("Tenant not found");
-  }
-  return *it;
-}
+    TenantService::TenantService()
+        : repository_(nullptr)
+        , use_memory_(true)
+    {
+        // seed with a default tenant for demo purposes
+        TenantModel demo{
+            .id        = next_id_++,
+            .tenant_id = "demo",
+            .name      = "Demo Tenant",
+            .plan      = "basic",
+            .active    = true,
+        };
+        tenants_.push_back(demo);
+    }
 
-std::vector<TenantModel> TenantService::list_tenants() const {
-  return tenants_;
-}
+    TenantModel* TenantService::find_tenant_by_id(const std::string& tenant_id) const
+    {
+        auto it = std::find_if(tenants_.begin(), tenants_.end(),
+                               [&](const TenantModel& t) { return t.tenant_id == tenant_id; });
+        if(it == tenants_.end())
+        {
+            return nullptr;
+        }
+        return &(*it);
+    }
 
-TenantModel TenantService::create_tenant(const CreateTenantDto &dto) {
-  if (dto.tenant_id.empty()) {
-    throw ValidationException("tenant_id is required");
-  }
-  if (dto.name.empty()) {
-    throw ValidationException("Tenant name is required");
-  }
+    TenantModel TenantService::get_tenant(const std::string& tenant_id) const
+    {
+        if(use_memory_)
+        {
+            auto* tenant = find_tenant_by_id(tenant_id);
+            if(!tenant)
+            {
+                throw NotFoundException("Tenant not found");
+            }
+            return *tenant;
+        }
 
-  auto exists =
-      std::any_of(tenants_.begin(), tenants_.end(), [&](const TenantModel &t) {
-        return t.tenant_id == dto.tenant_id;
-      });
-  if (exists) {
-    throw ValidationException("Tenant already exists");
-  }
+        auto tenant = repository_->find_by_tenant_id(tenant_id);
+        if(!tenant)
+        {
+            throw NotFoundException("Tenant not found");
+        }
+        return tenant.value();
+    }
 
-  TenantModel tenant{
-      .id = next_id_++,
-      .tenant_id = dto.tenant_id,
-      .name = dto.name,
-      .plan = dto.plan.empty() ? "free" : dto.plan,
-      .active = dto.active,
-  };
+    std::vector<TenantModel> TenantService::list_tenants() const
+    {
+        if(use_memory_)
+        {
+            return tenants_;
+        }
 
-  tenants_.push_back(tenant);
-  return tenant;
-}
+        return repository_->find_all();
+    }
 
-TenantModel TenantService::update_tenant(const std::string &tenant_id,
-                                         const UpdateTenantDto &dto) {
-  auto it =
-      std::find_if(tenants_.begin(), tenants_.end(), [&](const TenantModel &t) {
-        return t.tenant_id == tenant_id;
-      });
-  if (it == tenants_.end()) {
-    throw NotFoundException("Tenant not found");
-  }
+    TenantModel TenantService::create_tenant(const CreateTenantDto& dto)
+    {
+        if(dto.tenant_id.empty())
+        {
+            throw ValidationException("tenant_id is required");
+        }
+        if(dto.name.empty())
+        {
+            throw ValidationException("Tenant name is required");
+        }
 
-  // Update fields if provided
-  if (dto.name.has_value()) {
-    it->name = dto.name.value();
-  }
-  if (dto.plan.has_value()) {
-    it->plan = dto.plan.value();
-  }
-  if (dto.active.has_value()) {
-    it->active = dto.active.value();
-  }
+        if(use_memory_)
+        {
+            auto exists = std::any_of(
+                tenants_.begin(), tenants_.end(),
+                [&](const TenantModel& t) { return t.tenant_id == dto.tenant_id; });
+            if(exists)
+            {
+                throw ValidationException("Tenant already exists");
+            }
 
-  return *it;
-}
+            TenantModel tenant{
+                .id        = next_id_++,
+                .tenant_id = dto.tenant_id,
+                .name      = dto.name,
+                .plan      = dto.plan.empty() ? "free" : dto.plan,
+                .active    = dto.active,
+            };
 
-void TenantService::delete_tenant(const std::string &tenant_id) {
-  auto it =
-      std::find_if(tenants_.begin(), tenants_.end(), [&](const TenantModel &t) {
-        return t.tenant_id == tenant_id;
-      });
-  if (it == tenants_.end()) {
-    throw NotFoundException("Tenant not found");
-  }
+            tenants_.push_back(tenant);
+            return tenant;
+        }
 
-  // Soft delete - just deactivate the tenant
-  it->active = false;
-}
+        // Check tenant_id uniqueness
+        if(repository_->tenant_id_exists(dto.tenant_id))
+        {
+            throw ValidationException("Tenant already exists");
+        }
+
+        TenantModel tenant{
+            .id        = 0,
+            .tenant_id = dto.tenant_id,
+            .name      = dto.name,
+            .plan      = dto.plan.empty() ? "free" : dto.plan,
+            .active    = dto.active,
+        };
+
+        auto id   = repository_->insert(tenant);
+        tenant.id = id;
+        return tenant;
+    }
+
+    TenantModel TenantService::update_tenant(const std::string& tenant_id,
+                                             const UpdateTenantDto& dto)
+    {
+        if(use_memory_)
+        {
+            auto* tenant = find_tenant_by_id(tenant_id);
+            if(!tenant)
+            {
+                throw NotFoundException("Tenant not found");
+            }
+
+            if(dto.name.has_value())
+            {
+                tenant->name = dto.name.value();
+            }
+            if(dto.plan.has_value())
+            {
+                tenant->plan = dto.plan.value();
+            }
+            if(dto.active.has_value())
+            {
+                tenant->active = dto.active.value();
+            }
+
+            return *tenant;
+        }
+
+        auto existing = repository_->find_by_tenant_id(tenant_id);
+        if(!existing)
+        {
+            throw NotFoundException("Tenant not found");
+        }
+
+        auto tenant = existing.value();
+
+        if(dto.name.has_value())
+        {
+            tenant.name = dto.name.value();
+        }
+        if(dto.plan.has_value())
+        {
+            tenant.plan = dto.plan.value();
+        }
+        if(dto.active.has_value())
+        {
+            tenant.active = dto.active.value();
+        }
+
+        repository_->update(tenant);
+        return tenant;
+    }
+
+    void TenantService::delete_tenant(const std::string& tenant_id)
+    {
+        if(use_memory_)
+        {
+            auto* tenant = find_tenant_by_id(tenant_id);
+            if(!tenant)
+            {
+                throw NotFoundException("Tenant not found");
+            }
+            tenant->active = false;
+            return;
+        }
+
+        auto existing = repository_->find_by_tenant_id(tenant_id);
+        if(!existing)
+        {
+            throw NotFoundException("Tenant not found");
+        }
+
+        // Soft delete by deactivating
+        repository_->deactivate(tenant_id);
+    }
 
 } // namespace services

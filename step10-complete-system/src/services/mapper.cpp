@@ -25,9 +25,10 @@ services::UserModel from_proto(const multitenant::v1::User &proto) {
 services::CreateUserDto
 from_proto(const multitenant::v1::CreateUserRequest &proto) {
   services::CreateUserDto dto;
+  // tenant_id comes from request metadata, set by handler
   dto.username = proto.username();
   dto.email = proto.email();
-  dto.password = proto.password();
+  dto.password_hash = proto.password(); // Password would be hashed in service layer
   dto.role = proto.role();
   dto.active = true;
   return dto;

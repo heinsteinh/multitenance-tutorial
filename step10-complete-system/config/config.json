@@ -11,21 +11,21 @@
     "level": "info",
     "format": "default",
     "enable_console": true,
-    "log_file_path": "logs/server.log",
+    "log_file_path": "",
     "max_file_size": 10485760,
     "max_files": 5
+  },
+  "database": {
+    "type": "sqlite",
+    "connection_string": "data/multitenant.db",
+    "pool_size": 10,
+    "connection_timeout": 30
   },
   "interceptors": {
     "enable_logging": true,
     "enable_auth": true,
     "enable_tenant": true,
     "enable_metrics": false
-  },
-  "database": {
-    "type": "sqlite",
-    "connection_string": ":memory:",
-    "pool_size": 10,
-    "connection_timeout": 30
   },
   "security": {
     "enable_tls": false,

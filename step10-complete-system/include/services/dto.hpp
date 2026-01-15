@@ -9,8 +9,10 @@ namespace services {
 
 struct UserModel {
   std::int64_t id{0};
+  std::string tenant_id;
   std::string username;
   std::string email;
+  std::string password_hash;
   std::string role;
   bool active{true};
 };
@@ -24,9 +26,10 @@ struct TenantModel {
 };
 
 struct CreateUserDto {
+  std::string tenant_id;
   std::string username;
   std::string email;
-  std::string password;
+  std::string password_hash;
   std::string role;
   bool active{true};
 };

@@ -8,7 +8,9 @@
     "grpc",
     "protobuf",
     "catch2",
-    "nlohmann-json"
+    "nlohmann-json",
+    "sqlite3",
+    "jwt-cpp"
   ],
   "builtin-baseline": "c82f74667287d3dc386bce81e44964370c91a289"
 }

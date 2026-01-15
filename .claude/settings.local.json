@@ -8,7 +8,9 @@
       "Bash(/Users/fkheinstein/Projects/DevOps/cpp-multitenant-tutorial/step04-repository-pattern/build/step04_demo)",
       "Bash(VCPKG_ROOT=\"$HOME/vcpkg\" cmake --build:*)",
       "Bash(/Users/fkheinstein/Projects/DevOps/cpp-multitenant-tutorial/step09-authorization/build/grpc_authorization_test:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(cmake:*)",
+      "Bash(/Users/fkheinstein/Projects/DevOps/cpp-multitenant-tutorial/step10-complete-system/build/grpc_complete_system_test:*)"
     ]
   }
 }

@@ -1,25 +1,31 @@
 #pragma once
 
+#include "auth/jwt_validator.hpp"
 #include "interceptors/base_interceptor.hpp"
+
+#include <memory>
 #include <optional>
 #include <string>
 
-namespace multitenant {
+namespace multitenant
+{
 
-// Simple authentication interceptor that validates bearer tokens
-class AuthInterceptor : public BaseServerInterceptor {
-public:
-  AuthInterceptor() = default;
+    /**
+     * Authentication interceptor that validates JWT bearer tokens
+     */
+    class AuthInterceptor : public BaseServerInterceptor
+    {
+    public:
+        AuthInterceptor() = default;
+        explicit AuthInterceptor(std::shared_ptr<auth::JwtValidator> jwt_validator);
 
-  void Intercept(grpc::experimental::InterceptorBatchMethods *methods) override;
+        void Intercept(grpc::experimental::InterceptorBatchMethods* methods) override;
 
-private:
-  // Simple token validation (in real app, would validate JWT)
-  std::optional<std::string> validate_token(const std::string &token);
+    private:
+        std::shared_ptr<auth::JwtValidator> jwt_validator_;
 
-  // Extract bearer token from authorization header
-  std::optional<std::string>
-  extract_bearer_token(const std::string &auth_header);
-};
+        // Extract bearer token from authorization header
+        std::optional<std::string> extract_bearer_token(const std::string& auth_header);
+    };
 
 } // namespace multitenant
